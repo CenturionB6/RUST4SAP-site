@@ -318,15 +318,15 @@
     const badgeEl = document.getElementById('badge');
     badgeEl.textContent = gate.outcome.toUpperCase();
     badgeEl.className = 'badge ' + gate.outcome;
-    if (stale) {
+    if (!gate.showFacts) {
       results.forEach(el => el.classList.remove('lit'));
       pinned = true;
       document.getElementById('reason').textContent = gate.reason;
-      ['fields', 'rows', 'dropped', 'scope', 'policy', 'records', 'evidence'].forEach(id => {
+      ['fields', 'rows', 'dropped', 'scope', 'policy', 'records'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.textContent = '—';
       });
-      document.getElementById('evidence').innerHTML = '';
+      if (!gate.showEvidence) document.getElementById('evidence').innerHTML = '';
       return;
     }
     // the engine classified this; the page only displays it
@@ -349,8 +349,10 @@
 
     pinned = true;
     results.forEach(el => el.classList.remove('lit'));
-    const node = results.find(el => el.classList.contains(gate.outcome));
-    if (node) node.classList.add('lit');
+    if (gate.lit) {
+      const node = results.find(el => el.classList.contains(gate.lit));
+      if (node) node.classList.add('lit');
+    }
   });
 
   toggle.addEventListener('click', () => {
