@@ -237,16 +237,17 @@
           <span class="dot"></span><span class="dot"></span><span class="dot"></span>
           <span class="term-title">sap_check_access — German controller, French records</span>
         </div>
-<pre><span class="cmd">$ tools/call sap_check_access</span>
+<pre><span class="c"># excerpt of a real tools/call response, reflowed for width</span>
+<span class="cmd">$ tools/call sap_check_access</span>
 <span class="c">  entity: A_BusinessPartner   action: read   record_region: FR</span>
 <span class="c">  subject: controller (DE) — clearance 2, region DE</span>
 
-<span class="k">allowed</span>   <span class="x" style="color:var(--deny)">false</span>
+<span class="k">allowed</span>   <span style="color:var(--deny)">false</span>
 <span class="k">reason</span>    <span class="s">no rule allows this request (deny by default)</span>
 <span class="k">evidence</span>
-  buyer-de-partners           allow  matched=false  <span class="c">role not in ["SAP_BR_BUYER"]</span>
-  controller-region-partners  allow  matched=false  <span class="s">region DE != record region FR</span>
-  external-no-finance         deny   matched=false  <span class="c">clearance 2 &gt; ceiling 0</span>
+  buyer-de-partners           allow matched=false  not matched: role not in ["SAP_BR_BUYER"]; region DE != record region FR
+  controller-region-partners  allow matched=false  not matched: region DE != record region FR
+  external-no-finance         deny  matched=false  not applicable: clearance 2 is above this rule's ceiling of 0
 <span class="ok">→ 0 rows returned</span></pre>
       </div>
     </div>
@@ -263,7 +264,7 @@
         asks is answered with the same breadth, whether the person behind it is a buyer who should see
         a partner's name, or a controller who may also see its bank details. Prompt injection makes it
         worse: the attacker does not need the credentials, only a sentence that changes the question.
-        And once a record is in the model's context, it has left your perimeter.
+        And once a record is in the model's context, it may have left your perimeter.
       </p>
       <p class="sub">
         An API gateway does not fix this. It authenticates the caller and rate-limits them, but it does
@@ -326,9 +327,10 @@
       <div class="paths">
         <article class="card">
           <h3>Why Rust</h3>
-          <p>One static binary, no runtime to install beside SAP, no garbage collector in the request
-             path, and memory safety enforced by the compiler rather than by review. The dependency
-             list is short on purpose: the parts that matter are readable in an afternoon.</p>
+          <p>One static binary, no runtime beside SAP, no garbage collector in the request path.
+             The policy decision itself measures <b>~3 µs</b> on this machine (200,000 evaluations,
+             release build), so the cost of a request is the network, not the rules. The core is
+             ~3,900 lines across 23 modules, with 14 direct dependencies.</p>
         </article>
         <article class="card">
           <h3>Who it is for</h3>
@@ -385,6 +387,12 @@
           <tr><td>Live SAP connection</td><td style="color:var(--warn)">not yet</td><td>connector is a mock; no SAP system has been contacted</td></tr>
         </tbody>
       </table>
+      <p class="sub" style="margin-top:18px;font-size:13px">
+        Of these 134, <b>37 are public</b> in <code>rust4sap-samples</code>: 23 of the 26
+        ABAC/classification tests (<code>export_shape</code> is not) and 14 of the 22 audit tests
+        (<code>audit_attribution</code> is not). The 10 server-contract tests, plus identity, JWKS,
+        edge and public-export tests, remain private.
+      </p>
     </div>
   </section>
 
@@ -467,17 +475,18 @@
           <tr><td>&nbsp;&nbsp;edge admission, HTTP transport</td><td><code>access_edge · http_transport</code></td><td class="pass">14</td></tr>
           <tr><td>&nbsp;&nbsp;public export leakage, pseudonyms</td><td><code>public_export · public_leakage</code></td><td class="pass">15</td></tr>
           <tr><td>&nbsp;&nbsp;tool contracts, server behaviour</td><td><code>src/server.rs unit tests</code></td><td class="pass">10</td></tr>
-          <tr><td colspan="3" style="text-align:left;font-family:inherit;color:var(--muted);font-size:13px">
-            Of these, 37 are public in <code>rust4sap-samples</code>: 23 of the 26 ABAC/classification
-            tests (<code>export_shape</code> is not) and 14 of the 22 audit tests
-            (<code>audit_attribution</code> is not). Identity, JWKS, edge and export tests are private.
-          </td></tr>
           <tr><td>Lints</td><td><code>cargo clippy</code></td><td class="pass">0 findings</td></tr>
           <tr><td>Release build</td><td><code>cargo build --release</code></td><td class="pass">1m 15s · 5.06 MB</td></tr>
           <tr><td>Clean clone</td><td><code>git clone &amp;&amp; cargo test</code></td><td class="pass">134 passed (private) · 37 (samples)</td></tr>
           <tr><td>Live SAP system</td><td>—</td><td style="color:var(--warn)">not yet</td></tr>
         </tbody>
       </table>
+      <p class="sub" style="margin-top:18px;font-size:13px">
+        Of these 134, <b>37 are public</b> in <code>rust4sap-samples</code>: 23 of the 26
+        ABAC/classification tests (<code>export_shape</code> is not) and 14 of the 22 audit tests
+        (<code>audit_attribution</code> is not). The 10 server-contract tests, plus identity, JWKS,
+        edge and public-export tests, remain private.
+      </p>
     </div>
   </section>
 
@@ -497,14 +506,21 @@
 <span class="ok">→ 37 passed</span>
 
 <span class="c"># the gateway itself is in the private repository — request access, then:</span>
-<span class="cmd">git clone git@github.com:CenturionB6/RUST4SAP.git</span>
-<span class="cmd">cd RUST4SAP/mcp &amp;&amp; cargo build --release</span>
+<span class="cmd">git clone git@github.com:CenturionB6/RUST4SAP.git &amp;&amp; cd RUST4SAP</span>
 
-<span class="c"># stdio (default) or Streamable HTTP; identity travels per call</span>
-<span class="cmd">./target/release/rust4sap-mcp --issuer $ISS --audience $AUD --jwks $JWKS \</span>
-<span class="cmd cont">  --entitlements $ENTS --http 127.0.0.1:8080</span>
+<span class="c"># the CLI crate (rust4sap) builds in ./target</span>
+<span class="cmd">cargo build --release</span>
+<span class="c"># the gateway is its own workspace, with its own target directory</span>
+<span class="cmd">(cd mcp &amp;&amp; cargo build --release)</span>
 
-<span class="c"># the readers underneath it</span>
+<span class="c"># ISS   = token issuer, e.g. https://kc.example/realms/infloww</span>
+<span class="c"># AUD   = this gateway's audience, e.g. rust4sap-mcp</span>
+<span class="c"># JWKS  = file or URL for the issuer's signing keys</span>
+<span class="c"># ENTS  = JSON mapping subject → roles/region (the entitlement source)</span>
+<span class="cmd">./mcp/target/release/rust4sap-mcp --issuer $ISS --audience $AUD \</span>
+<span class="cmd cont">  --jwks $JWKS --entitlements $ENTS --http 127.0.0.1:8080</span>
+
+<span class="c"># the readers underneath it live in the outer crate</span>
 <span class="cmd">./target/release/rust4sap odata service</span>
 <span class="cmd">./target/release/rust4sap idoc docs/order.xml</span></pre>
         </div>

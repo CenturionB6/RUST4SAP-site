@@ -27,13 +27,13 @@
           "rule": "controller-region-partners",
           "effect": "allow",
           "matched": false,
-          "why": "role not in [\"SAP_BR_FIN_CONTROLLER\"]; clearance 1 < required 2"
+          "why": "not matched: role not in [\"SAP_BR_FIN_CONTROLLER\"]; clearance 1 < required 2"
         },
         {
           "rule": "external-no-finance",
           "effect": "deny",
           "matched": false,
-          "why": "clearance 1 > ceiling 0"
+          "why": "not applicable: clearance 1 is above this rule's ceiling of 0"
         }
       ],
       "permitted_fields": [
@@ -90,7 +90,7 @@
           "rule": "buyer-de-partners",
           "effect": "allow",
           "matched": false,
-          "why": "role not in [\"SAP_BR_BUYER\"]"
+          "why": "not matched: role not in [\"SAP_BR_BUYER\"]"
         },
         {
           "rule": "controller-region-partners",
@@ -102,7 +102,7 @@
           "rule": "external-no-finance",
           "effect": "deny",
           "matched": false,
-          "why": "clearance 2 > ceiling 0"
+          "why": "not applicable: clearance 2 is above this rule's ceiling of 0"
         }
       ],
       "permitted_fields": [
@@ -162,19 +162,19 @@
           "rule": "buyer-de-partners",
           "effect": "allow",
           "matched": false,
-          "why": "role not in [\"SAP_BR_BUYER\"]; region DE != record region FR"
+          "why": "not matched: role not in [\"SAP_BR_BUYER\"]; region DE != record region FR"
         },
         {
           "rule": "controller-region-partners",
           "effect": "allow",
           "matched": false,
-          "why": "region DE != record region FR"
+          "why": "not matched: region DE != record region FR"
         },
         {
           "rule": "external-no-finance",
           "effect": "deny",
           "matched": false,
-          "why": "clearance 2 > ceiling 0"
+          "why": "not applicable: clearance 2 is above this rule's ceiling of 0"
         }
       ],
       "permitted_fields": [],
@@ -212,13 +212,13 @@
           "rule": "controller-region-partners",
           "effect": "allow",
           "matched": false,
-          "why": "role not in [\"SAP_BR_FIN_CONTROLLER\"]; clearance 1 < required 2"
+          "why": "not matched: role not in [\"SAP_BR_FIN_CONTROLLER\"]; clearance 1 < required 2"
         },
         {
           "rule": "external-no-finance",
           "effect": "deny",
           "matched": false,
-          "why": "clearance 1 > ceiling 0"
+          "why": "not applicable: clearance 1 is above this rule's ceiling of 0"
         }
       ],
       "permitted_fields": [
@@ -275,19 +275,19 @@
           "rule": "buyer-de-partners",
           "effect": "allow",
           "matched": false,
-          "why": "region FR != record region DE"
+          "why": "not matched: region FR != record region DE"
         },
         {
           "rule": "controller-region-partners",
           "effect": "allow",
           "matched": false,
-          "why": "role not in [\"SAP_BR_FIN_CONTROLLER\"]; clearance 1 < required 2; region FR != record region DE"
+          "why": "not matched: role not in [\"SAP_BR_FIN_CONTROLLER\"]; clearance 1 < required 2; region FR != record region DE"
         },
         {
           "rule": "external-no-finance",
           "effect": "deny",
           "matched": false,
-          "why": "clearance 1 > ceiling 0"
+          "why": "not applicable: clearance 1 is above this rule's ceiling of 0"
         }
       ],
       "permitted_fields": [],
@@ -319,13 +319,13 @@
           "rule": "buyer-de-partners",
           "effect": "allow",
           "matched": false,
-          "why": "role not in [\"SAP_BR_BUYER\"]; clearance 0 < required 1"
+          "why": "not matched: role not in [\"SAP_BR_BUYER\"]; clearance 0 < required 1"
         },
         {
           "rule": "controller-region-partners",
           "effect": "allow",
           "matched": false,
-          "why": "role not in [\"SAP_BR_FIN_CONTROLLER\"]; clearance 0 < required 2"
+          "why": "not matched: role not in [\"SAP_BR_FIN_CONTROLLER\"]; clearance 0 < required 2"
         },
         {
           "rule": "external-no-finance",
@@ -363,19 +363,19 @@
           "rule": "buyer-de-partners",
           "effect": "allow",
           "matched": false,
-          "why": "role not in [\"SAP_BR_BUYER\"]"
+          "why": "not matched: role not in [\"SAP_BR_BUYER\"]"
         },
         {
           "rule": "controller-region-partners",
           "effect": "allow",
           "matched": false,
-          "why": "role not in [\"SAP_BR_FIN_CONTROLLER\"]; clearance 1 < required 2"
+          "why": "not matched: role not in [\"SAP_BR_FIN_CONTROLLER\"]; clearance 1 < required 2"
         },
         {
           "rule": "external-no-finance",
           "effect": "deny",
           "matched": false,
-          "why": "clearance 1 > ceiling 0"
+          "why": "not applicable: clearance 1 is above this rule's ceiling of 0"
         }
       ],
       "permitted_fields": [],
