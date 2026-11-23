@@ -221,6 +221,10 @@
         result — filtered rows, projected fields, or a refusal with the rule that caused it.
         Built on OData and IDoc, with no proprietary runtime and no RFC SDK.
       </p>
+      <p class="micro" style="margin-top:-6px">
+        Today it runs against a <b>mock SAP connector</b>: the ABAC engine, MCP server and audit
+        chain are real and tested, the SAP connection is not.
+      </p>
       <div class="cta">
         <a class="btn primary" href="demo/rbac-abac.html">Try the live demo</a>
         <a class="btn" href="#evidence">See the evidence</a>
@@ -304,9 +308,11 @@
           <h3>Want to explore RUST4SAP?</h3>
           <p>
             The source repository is currently private. If you are an SAP developer, integration
-            engineer, or potential contributor interested in evaluating the project, request access.
-            Requests go to a public issue on the documentation repository — no email address is
-            published, and nothing you send is confidential by default, so keep credentials out of it.
+            engineer, or potential contributor evaluating the project, request access by email —
+            use the button, or open a public issue if you prefer. The policy engine and its tests
+            are already public at
+            <a href="https://github.com/CenturionB6/rust4sap-samples" style="color:var(--accent)">rust4sap-samples</a>,
+            so you can judge the ABAC behaviour before asking for anything.
           </p>
         </div>
         <div class="access-cta">
