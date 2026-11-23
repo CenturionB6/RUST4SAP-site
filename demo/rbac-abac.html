@@ -267,7 +267,9 @@
 
   // Light each outcome as the packet reaches it — one visual beat per decision.
   const CYCLE = 7000;
+  let pinned = false;          // true while an asked decision owns the outcome highlight
   function tick(now) {
+    if (pinned) { requestAnimationFrame(tick); return; }
     if (body.dataset.mode === 'both') {
       const t = (now % CYCLE) / CYCLE * 100;
       results.forEach(el => el.classList.toggle('lit', t >= Number(el.dataset.at)));
@@ -319,6 +321,7 @@
       ? JSON.stringify(sc.records, null, 2)
       : 'no records returned';
 
+    pinned = true;
     results.forEach(el => el.classList.remove('lit'));
     const target = sc.allowed ? (sc.permitted_fields.length < 4 ? 'conditional' : 'allow') : 'deny';
     const node = results.find(el => el.classList.contains(target));
@@ -326,6 +329,7 @@
   });
 
   toggle.addEventListener('click', () => {
+    pinned = false;
     const off = body.dataset.mode === 'both';
     body.dataset.mode = off ? 'rbac' : 'both';
     toggle.textContent = off ? 'ABAC: off' : 'ABAC: on';
