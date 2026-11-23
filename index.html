@@ -138,6 +138,18 @@
   .steps li > span { display: block; }   /* keep inline <code> inside the text cell */
   .steps li::before { content: counter(s); color: var(--accent); font: 600 12px/1.6 ui-monospace, monospace; }
 
+  .audience { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 940px) { .audience { grid-template-columns: 1fr; } }
+  .audience .card h3 { font-size: 15px; }
+  .audience .card p { margin: 0; font-size: 14px; line-height: 1.6; }
+  .why { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 26px;
+         padding-top: 24px; border-top: 1px solid var(--line); }
+  @media (max-width: 860px) { .why { grid-template-columns: 1fr; } }
+  .why h3 { margin: 0 0 8px; font-size: 15px; font-weight: 600; }
+  .why p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+  .why b { color: var(--ink); font-weight: 600; }
+  .why em { font-style: normal; color: var(--ink); }
+
   footer { border-top: 1px solid var(--line); padding: 26px 0 40px; color: var(--muted); font-size: 13px; }
   .foot { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
   .foot a { text-decoration: none; border-bottom: 1px solid transparent; }
@@ -161,6 +173,7 @@
   <div class="wrap nav">
     <div class="brand"><span class="mark">R4</span> RUST4SAP</div>
     <nav class="links">
+      <a class="link" href="#about">About</a>
       <a class="link" href="#paths">Paths</a>
       <a class="link" href="#refusal">Limits</a>
       <a class="link" href="#evidence">Evidence</a>
@@ -202,6 +215,55 @@
 <span class="c">  { "BusinessPartner": "0000100001", "LastName": "Muster" }</span>
 <span class="ok">  … 4 more</span>
 <span class="c">] } }</span></pre>
+      </div>
+    </div>
+  </section>
+
+<section id="about">
+    <div class="wrap">
+      <div class="eyebrow">About</div>
+      <h2 style="margin-top:12px">A small, honest tool for the gap between SAP and everything else.</h2>
+      <p class="sub">
+        SAP holds the records a company runs on. Getting those records into modern software usually
+        means a middleware licence, a JVM, an RFC SDK, or a consultant. RUST4SAP exists to make the
+        two open paths — OData and IDoc — available from one binary you can read in an afternoon.
+      </p>
+
+      <div class="audience">
+        <article class="card">
+          <h3>SAP developers</h3>
+          <p>Read a service contract, list entity sets, pull a collection, parse an IDoc dump —
+             without leaving the terminal or installing an SAP GUI. Output is JSON, so it composes
+             with the tools you already use.</p>
+        </article>
+        <article class="card">
+          <h3>Teams evaluating integration</h3>
+          <p>If a project only needs to <em>read</em> SAP data, a full middleware stack is often
+             the wrong first answer. This is a two-command proof of concept that costs nothing to
+             try and nothing to drop.</p>
+        </article>
+        <article class="card">
+          <h3>Platform and data engineers</h3>
+          <p>One static binary, no runtime, no daemon. It runs in a container, in CI, or on the same
+             host as your loader — and it exits with a meaningful status code.</p>
+        </article>
+      </div>
+
+      <div class="why">
+        <div>
+          <h3>Why Rust</h3>
+          <p>Not for speed. For <b>deployability</b>: a single binary with no garbage collector
+             pause, no JVM to patch, no interpreter to match. TLS comes from rustls, so there is no
+             OpenSSL version to reconcile with a customer's base image.</p>
+        </div>
+        <div>
+          <h3>What it is not</h3>
+          <ul class="refuse" style="margin-top:10px">
+            <li><span class="x">✕</span><span><b>A full SAP connector.</b> No BAPI, no IDoc <em>sending</em>, no RFC, no CDS modelling.</span></li>
+            <li><span class="x">✕</span><span><b>Production-proven against SAP.</b> It parses real formats and passes its tests; it has not yet run against a live system.</span></li>
+            <li><span class="x">✕</span><span><b>A middleware replacement.</b> If you need orchestration, retries and mapping across fifty interfaces, buy one.</span></li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
