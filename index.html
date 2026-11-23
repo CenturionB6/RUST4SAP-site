@@ -142,6 +142,15 @@
   @media (max-width: 940px) { .audience { grid-template-columns: 1fr; } }
   .audience .card h3 { font-size: 15px; }
   .audience .card p { margin: 0; font-size: 14px; line-height: 1.6; }
+  .access { display: flex; align-items: center; justify-content: space-between; gap: 24px;
+            margin-top: 26px; padding: 20px 22px; border: 1px solid var(--line);
+            border-radius: var(--radius); background: var(--panel); }
+  @media (max-width: 760px) { .access { flex-direction: column; align-items: flex-start; } }
+  .access h3 { margin: 0 0 6px; font-size: 15px; font-weight: 600; }
+  .access p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; max-width: 62ch; }
+  .btn.ghost { background: transparent; border-color: #2f353d; color: var(--ink); }
+  .btn.ghost:hover { background: #14171b; }
+
   .why { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 26px;
          padding-top: 24px; border-top: 1px solid var(--line); }
   @media (max-width: 860px) { .why { grid-template-columns: 1fr; } }
@@ -195,6 +204,7 @@
       <div class="cta">
         <a class="btn primary" href="#use">Get started</a>
         <a class="btn" href="#evidence">See the evidence</a>
+        <a class="btn ghost" href="https://github.com/CenturionB6/RUST4SAP-site/issues/new?labels=access-request&template=access-request.yml&title=Access+request%3A+">Request access</a>
       </div>
 
       <div class="term" aria-label="Terminal output from rust4sap">
@@ -247,6 +257,19 @@
           <p>One static binary, no runtime, no daemon. It runs in a container, in CI, or on the same
              host as your loader — and it exits with a meaningful status code.</p>
         </article>
+      </div>
+
+      <div class="access">
+        <div>
+          <h3>Want to explore RUST4SAP?</h3>
+          <p>
+            The source repository is currently private. If you are an SAP developer, integration
+            engineer, or potential contributor interested in evaluating the project, request access.
+            Requests go to a public issue on the documentation repository — no email address is
+            published, and nothing you send is confidential by default, so keep credentials out of it.
+          </p>
+        </div>
+        <a class="btn primary" href="https://github.com/CenturionB6/RUST4SAP-site/issues/new?labels=access-request&template=access-request.yml&title=Access+request%3A+">Request access</a>
       </div>
 
       <div class="why">
@@ -331,7 +354,7 @@
             <span class="dot"></span><span class="dot"></span><span class="dot"></span>
             <span class="term-title">quickstart</span>
           </div>
-<pre class="wrapcode"><span class="c"># source repository is private — request access, then:</span>
+<pre class="wrapcode"><span class="c"># source repository is private — request access at the link below or in About, then:</span>
 <span class="cmd">git clone git@github.com:CenturionB6/RUST4SAP.git</span>
 <span class="cmd">cd RUST4SAP &amp;&amp; cargo build --release</span>
 

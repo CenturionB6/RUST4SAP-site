@@ -1,0 +1,37 @@
+name: Request access to RUST4SAP
+description: Ask for read access to the private source repository
+title: "Access request: <your name>"
+labels: ["access-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The source repository is private. Tell us who you are and what you want to do with it —
+        a sentence is enough. This issue is public; do not paste credentials or customer data.
+  - type: input
+    id: github
+    attributes:
+      label: GitHub username to grant access to
+      placeholder: octocat
+    validations:
+      required: true
+  - type: dropdown
+    id: role
+    attributes:
+      label: Which describes you
+      options:
+        - SAP developer / ABAP
+        - Integration or platform engineer
+        - Evaluating RUST4SAP for a team
+        - Potential contributor
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: intent
+    attributes:
+      label: What do you want to do with it
+      description: One or two sentences is plenty. Mention the SAP side you integrate with (OData service, IDoc type, system version) if you know it.
+      placeholder: Reading purchase orders from an on-prem S/4 system via OData, evaluating whether to replace a middleware hop.
+    validations:
+      required: true
