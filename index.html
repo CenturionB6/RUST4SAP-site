@@ -209,10 +209,12 @@
   <section class="hero" style="border-top:0">
     <div class="wrap">
       <div class="eyebrow">Rust · SAP · no RFC SDK</div>
-      <h1>SAP integration that <em>compiles</em>, not one that wraps a black box.</h1>
+      <h1>The authorization layer for AI-to-SAP integration.</h1>
       <p class="lede">
-        OData reads and IDoc parsing in a single Rust binary. No proprietary runtime,
-        no JVM, no middleware. Every claim below is covered by a test you can run.
+        <b>AI agents request. Rust enforces. ABAC decides. SAP executes.</b><br>
+        Authorization is enforced independently of the model: the server decides from attributes,
+        and the assistant only ever sees the result. OData reads and IDoc parsing in one binary —
+        no proprietary runtime, no JVM, no middleware.
       </p>
       <div class="cta">
         <a class="btn primary" href="#use">Get started</a>
@@ -369,6 +371,10 @@
         architecture, the policy model, and the four-employee demonstration where the same question
         returns different data because the attributes differ.
       </p>
+      <p class="sub" style="margin-top:-18px">
+        Prefer to click rather than read? <a href="demo/rbac-abac.html" style="color:var(--accent)">Run the decision live</a> —
+        pick an employee, ask, and see the engine's rule-by-rule answer.
+      </p>
 
       <div class="slides-grid">
         <ol class="slide-index">
@@ -384,7 +390,7 @@
         <div class="slides-cta">
           <a class="btn primary" href="deck/sap-abac-mcp-gateway.pptx" download>Download the deck (47 KB)</a>
           <span class="micro">PowerPoint (.pptx) · 16:9 · editable text, no images</span>
-          <a class="btn ghost" href="#about">How the decision is made</a>
+          <a class="btn ghost" href="demo/rbac-abac.html">Try the decision live</a>
         </div>
       </div>
     </div>

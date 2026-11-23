@@ -1,0 +1,243 @@
+{
+  "generated_by": "rust4sap-mcp export_decisions (the same PolicySet the server runs)",
+  "policy_version": "2026-11-23",
+  "note": "Decisions computed by the Rust engine at export time; the page replays them and does not re-implement the policy.",
+  "scenarios": [
+    {
+      "id": "clerk-de",
+      "employee": "clerk (DE)",
+      "role": "SAP_BR_BUYER",
+      "clearance": 1,
+      "subject_region": "DE",
+      "asks_about": "DE",
+      "allowed": true,
+      "reason": "allowed by buyer-de-partners",
+      "evidence": [
+        {
+          "rule": "buyer-de-partners",
+          "effect": "allow",
+          "matched": true,
+          "why": "all conditions met"
+        },
+        {
+          "rule": "controller-all-partners",
+          "effect": "allow",
+          "matched": false,
+          "why": "role not in [\"SAP_BR_FIN_CONTROLLER\"]; clearance 1 < required 2"
+        },
+        {
+          "rule": "external-no-finance",
+          "effect": "deny",
+          "matched": false,
+          "why": "clearance 1 > ceiling 0"
+        }
+      ],
+      "permitted_fields": [
+        "BusinessPartner",
+        "LastName",
+        "Region"
+      ],
+      "rows_returned": 1,
+      "rows_dropped": 2,
+      "records": [
+        {
+          "BusinessPartner": "0000100001",
+          "LastName": "Muster",
+          "Region": "DE"
+        }
+      ]
+    },
+    {
+      "id": "controller-de",
+      "employee": "controller (DE)",
+      "role": "SAP_BR_FIN_CONTROLLER",
+      "clearance": 2,
+      "subject_region": "DE",
+      "asks_about": "DE",
+      "allowed": true,
+      "reason": "allowed by controller-all-partners",
+      "evidence": [
+        {
+          "rule": "buyer-de-partners",
+          "effect": "allow",
+          "matched": false,
+          "why": "role not in [\"SAP_BR_BUYER\"]"
+        },
+        {
+          "rule": "controller-all-partners",
+          "effect": "allow",
+          "matched": true,
+          "why": "all conditions met"
+        },
+        {
+          "rule": "external-no-finance",
+          "effect": "deny",
+          "matched": false,
+          "why": "clearance 2 > ceiling 0"
+        }
+      ],
+      "permitted_fields": [
+        "BusinessPartner",
+        "IBAN",
+        "LastName",
+        "Region"
+      ],
+      "rows_returned": 1,
+      "rows_dropped": 2,
+      "records": [
+        {
+          "BusinessPartner": "0000100001",
+          "IBAN": "DE00 0000 0000 0000 0001",
+          "LastName": "Muster",
+          "Region": "DE"
+        }
+      ]
+    },
+    {
+      "id": "clerk-fr",
+      "employee": "clerk (FR)",
+      "role": "SAP_BR_BUYER",
+      "clearance": 1,
+      "subject_region": "FR",
+      "asks_about": "FR",
+      "allowed": true,
+      "reason": "allowed by buyer-de-partners",
+      "evidence": [
+        {
+          "rule": "buyer-de-partners",
+          "effect": "allow",
+          "matched": true,
+          "why": "all conditions met"
+        },
+        {
+          "rule": "controller-all-partners",
+          "effect": "allow",
+          "matched": false,
+          "why": "role not in [\"SAP_BR_FIN_CONTROLLER\"]; clearance 1 < required 2"
+        },
+        {
+          "rule": "external-no-finance",
+          "effect": "deny",
+          "matched": false,
+          "why": "clearance 1 > ceiling 0"
+        }
+      ],
+      "permitted_fields": [
+        "BusinessPartner",
+        "LastName",
+        "Region"
+      ],
+      "rows_returned": 1,
+      "rows_dropped": 2,
+      "records": [
+        {
+          "BusinessPartner": "0000100002",
+          "LastName": "Dupont",
+          "Region": "FR"
+        }
+      ]
+    },
+    {
+      "id": "clerk-fr-de",
+      "employee": "clerk (FR) asks about DE",
+      "role": "SAP_BR_BUYER",
+      "clearance": 1,
+      "subject_region": "FR",
+      "asks_about": "DE",
+      "allowed": false,
+      "reason": "no rule allows this request (deny by default)",
+      "evidence": [
+        {
+          "rule": "buyer-de-partners",
+          "effect": "allow",
+          "matched": false,
+          "why": "region FR != record region DE"
+        },
+        {
+          "rule": "controller-all-partners",
+          "effect": "allow",
+          "matched": false,
+          "why": "role not in [\"SAP_BR_FIN_CONTROLLER\"]; clearance 1 < required 2"
+        },
+        {
+          "rule": "external-no-finance",
+          "effect": "deny",
+          "matched": false,
+          "why": "clearance 1 > ceiling 0"
+        }
+      ],
+      "permitted_fields": [],
+      "rows_returned": 0,
+      "rows_dropped": 3,
+      "records": []
+    },
+    {
+      "id": "external-de",
+      "employee": "external auditor",
+      "role": "SAP_BR_AUDITOR",
+      "clearance": 0,
+      "subject_region": "DE",
+      "asks_about": "DE",
+      "allowed": false,
+      "reason": "denied by external-no-finance: all conditions met",
+      "evidence": [
+        {
+          "rule": "buyer-de-partners",
+          "effect": "allow",
+          "matched": false,
+          "why": "role not in [\"SAP_BR_BUYER\"]; clearance 0 < required 1"
+        },
+        {
+          "rule": "controller-all-partners",
+          "effect": "allow",
+          "matched": false,
+          "why": "role not in [\"SAP_BR_FIN_CONTROLLER\"]; clearance 0 < required 2"
+        },
+        {
+          "rule": "external-no-finance",
+          "effect": "deny",
+          "matched": true,
+          "why": "all conditions met"
+        }
+      ],
+      "permitted_fields": [],
+      "rows_returned": 0,
+      "rows_dropped": 3,
+      "records": []
+    },
+    {
+      "id": "intern-de",
+      "employee": "intern (DE)",
+      "role": "SAP_BR_INTERN",
+      "clearance": 1,
+      "subject_region": "DE",
+      "asks_about": "DE",
+      "allowed": false,
+      "reason": "no rule allows this request (deny by default)",
+      "evidence": [
+        {
+          "rule": "buyer-de-partners",
+          "effect": "allow",
+          "matched": false,
+          "why": "role not in [\"SAP_BR_BUYER\"]"
+        },
+        {
+          "rule": "controller-all-partners",
+          "effect": "allow",
+          "matched": false,
+          "why": "role not in [\"SAP_BR_FIN_CONTROLLER\"]; clearance 1 < required 2"
+        },
+        {
+          "rule": "external-no-finance",
+          "effect": "deny",
+          "matched": false,
+          "why": "clearance 1 > ceiling 0"
+        }
+      ],
+      "permitted_fields": [],
+      "rows_returned": 0,
+      "rows_dropped": 3,
+      "records": []
+    }
+  ]
+}
