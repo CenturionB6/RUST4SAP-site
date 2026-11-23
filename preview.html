@@ -467,6 +467,11 @@
           <tr><td>&nbsp;&nbsp;edge admission, HTTP transport</td><td><code>access_edge · http_transport</code></td><td class="pass">14</td></tr>
           <tr><td>&nbsp;&nbsp;public export leakage, pseudonyms</td><td><code>public_export · public_leakage</code></td><td class="pass">15</td></tr>
           <tr><td>&nbsp;&nbsp;tool contracts, server behaviour</td><td><code>src/server.rs unit tests</code></td><td class="pass">10</td></tr>
+          <tr><td colspan="3" style="text-align:left;font-family:inherit;color:var(--muted);font-size:13px">
+            Of these, 37 are public in <code>rust4sap-samples</code>: 23 of the 26 ABAC/classification
+            tests (<code>export_shape</code> is not) and 14 of the 22 audit tests
+            (<code>audit_attribution</code> is not). Identity, JWKS, edge and export tests are private.
+          </td></tr>
           <tr><td>Lints</td><td><code>cargo clippy</code></td><td class="pass">0 findings</td></tr>
           <tr><td>Release build</td><td><code>cargo build --release</code></td><td class="pass">1m 15s · 5.06 MB</td></tr>
           <tr><td>Clean clone</td><td><code>git clone &amp;&amp; cargo test</code></td><td class="pass">134 passed (private) · 37 (samples)</td></tr>
