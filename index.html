@@ -148,6 +148,8 @@
   @media (max-width: 760px) { .access { flex-direction: column; align-items: flex-start; } }
   .access h3 { margin: 0 0 6px; font-size: 15px; font-weight: 600; }
   .access p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.6; max-width: 62ch; }
+  .access-cta { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+  .micro { font-size: 12px; line-height: 1.4; color: var(--muted); }
   .btn.ghost { background: transparent; border-color: #2f353d; color: var(--ink); }
   .btn.ghost:hover { background: #14171b; }
 
@@ -204,7 +206,7 @@
       <div class="cta">
         <a class="btn primary" href="#use">Get started</a>
         <a class="btn" href="#evidence">See the evidence</a>
-        <a class="btn ghost" href="https://github.com/CenturionB6/RUST4SAP-site/issues/new?labels=access-request&template=access-request.yml&title=Access+request%3A+">Request access</a>
+        <a class="btn ghost" title="GitHub account required. Access requests are public." href="https://github.com/CenturionB6/RUST4SAP-site/issues/new?labels=access-request&template=access-request.yml&title=Access+request%3A+">Request access</a>
       </div>
 
       <div class="term" aria-label="Terminal output from rust4sap">
@@ -269,7 +271,10 @@
             published, and nothing you send is confidential by default, so keep credentials out of it.
           </p>
         </div>
-        <a class="btn primary" href="https://github.com/CenturionB6/RUST4SAP-site/issues/new?labels=access-request&template=access-request.yml&title=Access+request%3A+">Request access</a>
+        <div class="access-cta">
+          <a class="btn primary" href="https://github.com/CenturionB6/RUST4SAP-site/issues/new?labels=access-request&template=access-request.yml&title=Access+request%3A+">Request access</a>
+          <span class="micro">GitHub account required. Access requests are public.</span>
+        </div>
       </div>
 
       <div class="why">
