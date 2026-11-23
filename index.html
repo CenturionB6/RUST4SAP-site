@@ -194,9 +194,10 @@
   <div class="wrap nav">
     <div class="brand"><span class="mark">R4</span> RUST4SAP</div>
     <nav class="links">
+      <a class="link" href="#demo">Demo</a>
       <a class="link" href="#about">About</a>
       <a class="link" href="#paths">Paths</a>
-      <a class="link" href="#refusal">Limits</a>
+      <a class="link" href="#status">Status</a>
       <a class="link" href="#evidence">Evidence</a>
       <a class="link" href="#slides">Slides</a>
       <a class="link" href="#use">Use it</a>
@@ -208,18 +209,19 @@
 <main>
   <section class="hero" style="border-top:0">
     <div class="wrap">
-      <div class="eyebrow">Rust · SAP · no RFC SDK</div>
-      <h1>The authorization layer for AI-to-SAP integration.</h1>
+      <div class="eyebrow">Rust · SAP · ABAC · no RFC SDK</div>
+      <h1>Let AI agents read SAP without handing them the keys.</h1>
       <p class="lede">
         <b>AI agents request. Rust enforces. ABAC decides. SAP executes.</b><br>
-        Authorization is enforced independently of the model: the server decides from attributes,
-        and the assistant only ever sees the result. OData reads and IDoc parsing in one binary —
-        no proprietary runtime, no JVM, no middleware.
+        RUST4SAP is a Rust gateway between AI assistants and SAP. The server decides what each
+        user's agent may see from the user's attributes, and the model only ever receives the
+        result — filtered rows, projected fields, or a refusal with the rule that caused it.
+        Built on OData and IDoc, with no proprietary runtime and no RFC SDK.
       </p>
       <div class="cta">
-        <a class="btn primary" href="#use">Get started</a>
+        <a class="btn primary" href="demo/rbac-abac.html">Try the live demo</a>
         <a class="btn" href="#evidence">See the evidence</a>
-        <a class="btn ghost" title="GitHub account required. Access requests are public." href="https://github.com/CenturionB6/RUST4SAP-site/issues/new?labels=access-request&template=access-request.yml&title=Access+request%3A+">Request access</a>
+        <a class="btn ghost" href="mailto:centurionb6@proton.me?subject=RUST4SAP+access+request">Request access</a>
       </div>
 
       <div class="term" aria-label="Terminal output from rust4sap">
@@ -244,6 +246,26 @@
     </div>
   </section>
 
+
+  <section id="demo" style="border-top:1px solid var(--line)">
+    <div class="wrap">
+      <div class="eyebrow">Live demo</div>
+      <h2 style="margin-top:12px">The same question, five employees, five different answers.</h2>
+      <p class="lede" style="margin-bottom:22px">
+        Pick who is asking and which region they ask about. The answer, the permitted fields and
+        the rule-by-rule evidence come from <code>decisions.json</code>, exported by the Rust
+        policy engine — the page replays the engine's decisions and never re-implements them.
+      </p>
+      <a href="demo/rbac-abac.html" style="display:block;border:1px solid var(--line);border-radius:12px;overflow:hidden">
+        <img src="img/gateway-demo.png" alt="The gateway's decision panel: a German controller asking about French records is denied, with the failing region condition shown in the evidence table."
+             style="display:block;width:100%;height:auto">
+      </a>
+      <div class="cta" style="margin-top:18px">
+        <a class="btn primary" href="demo/rbac-abac.html">Open the interactive demo</a>
+        <a class="btn ghost" href="demo/decisions.json">Read decisions.json</a>
+      </div>
+    </div>
+  </section>
 <section id="about">
     <div class="wrap">
       <div class="eyebrow">About</div>
@@ -285,7 +307,8 @@
           </p>
         </div>
         <div class="access-cta">
-          <a class="btn primary" href="https://github.com/CenturionB6/RUST4SAP-site/issues/new?labels=access-request&template=access-request.yml&title=Access+request%3A+">Request access</a>
+          <a class="btn primary" href="mailto:centurionb6@proton.me?subject=RUST4SAP+access+request">Email for access</a>
+          <a class="btn ghost" title="GitHub account required. Access requests are public." href="https://github.com/CenturionB6/RUST4SAP-site/issues/new?labels=access-request&template=access-request.yml&title=Access+request%3A+">or open a public issue</a>
           <span class="micro">GitHub account required. Access requests are public.</span>
         </div>
       </div>
@@ -333,9 +356,75 @@
     </div>
   </section>
 
+
+  <section id="status">
+    <div class="wrap">
+      <div class="eyebrow">Status</div>
+      <h2 style="margin-top:12px">What exists as running code, and what doesn't.</h2>
+      <p class="sub">A security tool should be explicit about this. Nothing below is described as
+        "working" unless it runs today.</p>
+      <table class="ev">
+        <thead><tr><th>Capability</th><th>State</th><th>What that means</th></tr></thead>
+        <tbody>
+          <tr><td>OData reads</td><td class="pass">built</td><td>metadata, entity sets, <code>$top/$select/$filter/$orderby</code></td></tr>
+          <tr><td>IDoc parsing</td><td class="pass">built</td><td>typed tree or flattened pairs; malformed input fails closed</td></tr>
+          <tr><td>ABAC engine</td><td class="pass">built</td><td>deny-by-default, deny-overrides-allow, field projection as the grant</td></tr>
+          <tr><td>MCP server (6 tools)</td><td class="pass">built</td><td>stdio and Streamable HTTP; every tool has a declared authorization contract</td></tr>
+          <tr><td>Verified identity</td><td class="pass">built</td><td>JWT + JWKS with rotation; subject built only from verified claims + entitlements</td></tr>
+          <tr><td>Hash-chained audit</td><td class="pass">built</td><td>versioned chain, streaming verification, torn history refuses to append</td></tr>
+          <tr><td>Public demo</td><td class="pass">demoed</td><td>replays decisions exported by the engine — not a JS re-implementation</td></tr>
+          <tr><td>Cloudflare edge + Worker</td><td style="color:var(--warn)">written, not deployed</td><td>adapter tested locally; no Tunnel, Access app or VPC exists</td></tr>
+          <tr><td>Remote audit sink</td><td style="color:var(--warn)">planned</td><td>production refuses to start without it</td></tr>
+          <tr><td>DPoP sender-constraint</td><td style="color:var(--warn)">planned</td><td>a production gate that remains closed</td></tr>
+          <tr><td>Live SAP connection</td><td style="color:var(--warn)">not yet</td><td>connector is a mock; no SAP system has been contacted</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="threat-model">
+    <div class="wrap">
+      <div class="eyebrow">Threat model</div>
+      <h2 style="margin-top:12px">What the gateway is for, and what it is not.</h2>
+      <div class="paths">
+        <article class="card">
+          <h3>It protects against</h3>
+          <p>A model that is talked into asking for more than the user may see. Prompt injection can
+             change what the agent <em>requests</em>; it cannot change the attributes the server
+             decides from. Over-broad queries are refused, fields outside the grant are projected
+             away, and rows outside the user's region never enter the model's context.</p>
+        </article>
+        <article class="card">
+          <h3>It does not protect against</h3>
+          <p>A compromised SAP account, a malicious policy author, or an operator who can restart
+             the gateway with different configuration. The audit chain is tamper-evident only when a
+             copy is retained elsewhere. A stolen bearer token is replayable until it expires —
+             sender-constraining is planned, not implemented.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="differs">
+    <div class="wrap">
+      <div class="eyebrow">How it differs</div>
+      <h2 style="margin-top:12px">Not an API gateway, not a generic MCP server.</h2>
+      <ul class="refuse">
+        <li><span class="k" style="color:var(--accent)">·</span><span><b>vs. SAP's own tooling.</b> No RFC SDK, no JVM, no middleware licence. One binary that reads OData and IDoc, and refuses what it cannot do.</span></li>
+        <li><span class="k" style="color:var(--accent)">·</span><span><b>vs. a generic MCP server.</b> Most MCP servers forward whatever the model asks for. This one treats the model as untrusted and answers from attributes, not from the prompt.</span></li>
+        <li><span class="k" style="color:var(--accent)">·</span><span><b>vs. an API gateway.</b> An API gateway authenticates callers and rate-limits them. It does not know that a buyer may see a business partner's name but not its IBAN, or that clearance buys sensitivity but not geography.</span></li>
+      </ul>
+      <p class="sub" style="margin-top:22px">
+        Built and maintained by <b>CenturionB6</b>.
+        <a href="mailto:centurionb6@proton.me?subject=RUST4SAP" style="color:var(--accent)">centurionb6@proton.me</a>
+        — the fastest way to ask a question or request access.
+      </p>
+    </div>
+  </section>
+
   <section id="refusal">
     <div class="wrap">
-      <h2>What it refuses to do</h2>
+      <h2>What it refuses to do — and what that costs.</h2>
       <p class="sub">A tool is defined by its limits as much as its features. These are deliberate.</p>
       <ul class="refuse">
         <li><span class="x">✕</span><span><b>RFC.</b> Classic RFC needs SAP's proprietary NW RFC SDK, which is not redistributable. Any “pure Rust RFC” crate either bundles it or reimplements an unsupported stack.</span></li>
@@ -348,14 +437,21 @@
   <section id="evidence">
     <div class="wrap">
       <h2>Evidence, not adjectives</h2>
-      <p class="sub">Run these yourself. The numbers come from the repository, not from a slide.</p>
+      <p class="sub">Results from the <b>private</b> repository. The test code is not public yet; these
+        are the numbers the suite produces, and the breakdown says what they cover.</p>
       <table class="ev">
         <thead><tr><th>Check</th><th>Command</th><th>Result</th></tr></thead>
         <tbody>
-          <tr><td>Unit tests</td><td><code>cargo test</code></td><td class="pass">8 passed</td></tr>
+          <tr><td>Unit + integration tests</td><td><code>cargo test</code></td><td class="pass">134 passed</td></tr>
+          <tr><td>&nbsp;&nbsp;identity, delegation, per-request isolation</td><td><code>tests/identity</code>, <code>request_identity</code></td><td class="pass">23</td></tr>
+          <tr><td>&nbsp;&nbsp;ABAC rules, clearance, scope monotonicity</td><td><code>tests/abac</code>, <code>classification</code></td><td class="pass">19</td></tr>
+          <tr><td>&nbsp;&nbsp;JWKS rotation and refresh concurrency</td><td><code>tests/jwks_*</code></td><td class="pass">13</td></tr>
+          <tr><td>&nbsp;&nbsp;audit chain, attribution, torn-tail refusal</td><td><code>tests/audit_*</code>, <code>failure_stage</code></td><td class="pass">26</td></tr>
+          <tr><td>&nbsp;&nbsp;edge admission, expiry, audience, spoofing</td><td><code>tests/access_edge</code>, <code>http_transport</code></td><td class="pass">14</td></tr>
+          <tr><td>&nbsp;&nbsp;public export leakage, pseudonyms</td><td><code>tests/public_*</code></td><td class="pass">15</td></tr>
           <tr><td>Lints</td><td><code>cargo clippy</code></td><td class="pass">0 findings</td></tr>
           <tr><td>Release build</td><td><code>cargo build --release</code></td><td class="pass">1m 15s · 5.06 MB</td></tr>
-          <tr><td>Clean clone</td><td><code>git clone &amp;&amp; cargo test</code></td><td class="pass">8 passed</td></tr>
+          <tr><td>Clean clone</td><td><code>git clone &amp;&amp; cargo test</code></td><td class="pass">134 passed</td></tr>
           <tr><td>Live SAP system</td><td>—</td><td style="color:var(--warn)">not yet</td></tr>
         </tbody>
       </table>
@@ -418,7 +514,7 @@
         </div>
         <div>
           <ol class="steps">
-            <li><span>Rust 1.75+ and a C toolchain — nothing else.</span></li>
+            <li><span>Rust 1.98 (developed and tested on 1.98.0) and a C toolchain — nothing else. Built on macOS; Linux and Windows are the target platforms.</span></li>
             <li><span>Credentials from flags or environment, never a config file in the repo.</span></li>
             <li><span>Output is JSON on stdout, so it pipes straight into <code>jq</code> or a queue.</span></li>
             <li><span>Exit codes are meaningful: a non-zero status means the read failed.</span></li>
@@ -431,7 +527,7 @@
 
 <footer>
   <div class="wrap foot">
-    <span>MIT licensed · Rust 1.98 · built on macOS, developed for Linux and Windows</span>
+    <span>MIT licensed · Rust 1.98</span>
     <span><a href="https://github.com/CenturionB6/RUST4SAP-site">github.com/CenturionB6/RUST4SAP-site</a></span>
   </div>
 </footer>
