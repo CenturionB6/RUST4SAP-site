@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en" data-type="software" data-radius="sharp" data-buttons="step">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RUST4SAP — SAP integration without the RFC SDK</title>
+<meta name="page-type" content="software">
+<meta name="site-kind" content="software">
+<meta name="description" content="Rust tooling for SAP: OData reads and IDoc parsing, with no proprietary RFC SDK.">
+<style>
+  :root {
+    --bg: #08090b;
+    --panel: #0e1013;
+    --panel-2: #14171b;
+    --line: #22262c;
+    --ink: #eceef1;
+    --muted: #8b939e;
+    --accent: #2f9ee8;      /* SAP-adjacent blue, not violet */
+    --accent-ink: #06121b;
+    --ok: #46c17d;
+    --warn: #d9a13b;
+    --radius: 2px;          /* sharp: dev tool */
+    --wrap: 1140px;
+    --step: cubic-bezier(.22,.61,.36,1);
+    font-synthesis: none;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 400 16px/1.55 ui-sans-serif, -apple-system, "Inter", "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: -0.003em;
+  }
+  a { color: inherit; }
+  .wrap { width: 100%; max-width: var(--wrap); margin: 0 auto; padding: 0 28px; }
+  @media (max-width: 640px) { .wrap { padding: 0 20px; } }
+
+  /* ---- nav ---- */
+  header.top {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    border-bottom: 1px solid var(--line); backdrop-filter: blur(10px);
+  }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 62px; gap: 20px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -0.01em; }
+  .mark { width: 22px; height: 22px; display: grid; place-items: center; background: var(--accent);
+          color: var(--accent-ink); border-radius: var(--radius); font: 700 12px/1 ui-monospace, monospace; }
+  .nav a.link { color: var(--muted); text-decoration: none; font-size: 14px; padding: 6px 0; position: relative; }
+  .nav a.link::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+    background: currentColor; transform: scaleX(0); transform-origin: left; transition: transform .22s var(--step); }
+  .nav a.link:hover { color: var(--ink); }
+  .nav a.link:hover::after { transform: scaleX(1); }
+  .nav .links { display: flex; gap: 22px; }
+  @media (max-width: 700px) { .nav .links { display: none; } }
+
+  /* ---- buttons ---- */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px;
+    border-radius: var(--radius); border: 1px solid var(--line); background: var(--panel-2);
+    color: var(--ink); font-size: 14px; font-weight: 550; text-decoration: none; cursor: pointer;
+    transition: transform .18s var(--step), background .18s var(--step), border-color .18s var(--step);
+  }
+  .btn:hover { transform: translateY(-1px); border-color: #2f353d; background: #171b20; }
+  .btn:active { transform: translateY(1px) scale(.99); }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+  .btn.primary:hover { background: #4aaee9; }
+
+  /* ---- hero ---- */
+  .hero { padding: 84px 0 72px; }
+  .eyebrow { font: 500 12px/1 ui-monospace, monospace; letter-spacing: .16em; color: var(--muted); text-transform: uppercase; }
+  h1 {
+    margin: 18px 0 0; font-weight: 600; letter-spacing: -0.035em; line-height: 1.02;
+    font-size: clamp(36px, 4.6vw, 58px); max-width: 19ch;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+  .lede { margin: 20px 0 0; max-width: 56ch; color: var(--muted); font-size: clamp(16px, 1.5vw, 18px); }
+  .cta { display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap; }
+
+  /* terminal = the real product */
+  .term {
+    margin-top: 44px; background: var(--panel); border: 1px solid var(--line);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .term-bar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--line);
+    background: var(--panel-2); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #2a2f36; }
+  .term-title { margin-left: 8px; font: 500 12px/1 ui-monospace, monospace; color: var(--muted); }
+  pre {
+    margin: 0; padding: 18px 18px 20px; overflow-x: auto;
+    font: 400 13px/1.65 ui-monospace, "SF Mono", Menlo, monospace; color: #cfd6df;
+  }
+  .cmd::before { content: "$ "; color: var(--muted); }
+  .cont::before { content: ""; }        /* a wrapped command keeps one prompt */
+  .wrapcode { white-space: pre-wrap; overflow-wrap: anywhere; }
+  code { white-space: nowrap; }        /* inline code never breaks mid-token */
+  .k { color: var(--accent); }        /* key */
+  .s { color: #b8c7a8; }              /* string-ish */
+  .c { color: #6c757f; }              /* comment */
+  .ok { color: var(--ok); }
+
+  /* ---- sections ---- */
+  section { padding: 72px 0; border-top: 1px solid var(--line); }
+  h2 { margin: 0 0 8px; font-size: clamp(24px, 2.6vw, 32px); font-weight: 600; letter-spacing: -0.025em; line-height: 1.15; }
+  .sub { margin: 0 0 32px; color: var(--muted); max-width: 62ch; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 860px) { .grid2 { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px;
+    transition: transform .2s var(--step), border-color .2s var(--step);
+  }
+  .card:hover { transform: translateY(-2px); border-color: #2f353d; }
+  .card h3 { margin: 0 0 6px; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+  .card p { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+  .tag { display: inline-block; font: 500 11px/1 ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--muted); border: 1px solid var(--line); border-radius: var(--radius); padding: 5px 7px; }
+  .tag.on { color: var(--ok); border-color: #1f3b2c; }
+
+  /* refusal list */
+  .refuse { display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; }
+  .refuse li { display: grid; grid-template-columns: 20px 1fr; gap: 12px; color: var(--muted); font-size: 15px; }
+  .refuse b { color: var(--ink); font-weight: 600; }
+  .refuse .x { color: var(--warn); font: 600 14px/1.5 ui-monospace, monospace; }
+
+  /* evidence table */
+  table.ev { width: 100%; border-collapse: collapse; font-size: 14px; }
+  table.ev th, table.ev td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--line); }
+  table.ev th { color: var(--muted); font-weight: 500; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+  table.ev td:last-child { text-align: right; font-family: ui-monospace, monospace; }
+  .pass { color: var(--ok); }
+
+  /* use it */
+  .use { display: grid; grid-template-columns: 1.15fr .85fr; gap: 20px; }
+  @media (max-width: 860px) { .use { grid-template-columns: 1fr; } }
+  .steps { margin: 0; padding: 0; list-style: none; counter-reset: s; }
+  .steps li { counter-increment: s; display: grid; grid-template-columns: 26px 1fr; gap: 10px; padding: 10px 0; color: var(--muted); }
+  .steps li > span { display: block; }   /* keep inline <code> inside the text cell */
+  .steps li::before { content: counter(s); color: var(--accent); font: 600 12px/1.6 ui-monospace, monospace; }
+
+  footer { border-top: 1px solid var(--line); padding: 26px 0 40px; color: var(--muted); font-size: 13px; }
+  .foot { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .foot a { text-decoration: none; border-bottom: 1px solid transparent; }
+  .foot a:hover { border-bottom-color: currentColor; color: var(--ink); }
+
+  @media (max-width: 640px) {
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .hero { padding: 56px 0 48px; }
+    section { padding: 56px 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+    .btn:hover, .card:hover { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap nav">
+    <div class="brand"><span class="mark">R4</span> RUST4SAP</div>
+    <nav class="links">
+      <a class="link" href="#paths">Paths</a>
+      <a class="link" href="#refusal">Limits</a>
+      <a class="link" href="#evidence">Evidence</a>
+      <a class="link" href="#use">Use it</a>
+    </nav>
+    <a class="btn" href="https://github.com/CenturionB6/RUST4SAP">Repository</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero" style="border-top:0">
+    <div class="wrap">
+      <div class="eyebrow">Rust · SAP · no RFC SDK</div>
+      <h1>SAP integration that <em>compiles</em>, not one that wraps a black box.</h1>
+      <p class="lede">
+        OData reads and IDoc parsing in a single Rust binary. No proprietary runtime,
+        no JVM, no middleware. Every claim below is covered by a test you can run.
+      </p>
+      <div class="cta">
+        <a class="btn primary" href="#use">Get started</a>
+        <a class="btn" href="#evidence">See the evidence</a>
+      </div>
+
+      <div class="term" aria-label="Terminal output from rust4sap">
+        <div class="term-bar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="term-title">rust4sap idoc order.xml --flat</span>
+        </div>
+<pre><span class="cmd">rust4sap idoc order.xml --flat</span>
+<span class="k">EDI_DC40-IDOCTYP</span>   <span class="s">ORDERS05</span>
+<span class="k">EDI_DC40-MESTYP</span>    <span class="s">ORDERS</span>
+<span class="k">EDI_DC40-DIRECT</span>    <span class="s">2</span>
+<span class="k">E1EDK01-BELNR</span>      <span class="s">4500012345</span>
+<span class="k">E1EDK01-CURCY</span>      <span class="s">EUR</span>
+
+<span class="cmd">rust4sap odata --root $SAP_ODATA_ROOT get A_BusinessPartner \</span>
+<span class="cmd cont">  --top 5 --select 'BusinessPartner,LastName' --filter "Country eq 'DE'"</span>
+<span class="c">{ "d": { "results": [</span>
+<span class="c">  { "BusinessPartner": "0000100001", "LastName": "Muster" }</span>
+<span class="ok">  … 4 more</span>
+<span class="c">] } }</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <section id="paths">
+    <div class="wrap">
+      <h2>Two paths that actually work</h2>
+      <p class="sub">SAP speaks many protocols. Only two of them are open enough to build on without a licence negotiation.</p>
+      <div class="grid2">
+        <article class="card">
+          <span class="tag on">working</span>
+          <h3>OData</h3>
+          <p>HTTP and JSON. Read <code>$metadata</code>, list entity sets, query collections with
+             <code>$top</code>, <code>$select</code>, <code>$filter</code>, <code>$orderby</code>.
+             Basic auth over rustls — no OpenSSL on the host.</p>
+<pre style="padding:0;background:none"><span class="cmd">cargo run -- odata --root $SAP_ODATA_ROOT metadata</span></pre>
+        </article>
+        <article class="card">
+          <span class="tag on">working</span>
+          <h3>IDoc</h3>
+          <p>XML documents with numbered segments. Parsed into a typed tree, or flattened to
+             <code>SEGMENT-FIELD</code> pairs for loading. Malformed input fails closed.</p>
+<pre style="padding:0;background:none"><span class="cmd">cargo run -- idoc order.xml --flat</span></pre>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="refusal">
+    <div class="wrap">
+      <h2>What it refuses to do</h2>
+      <p class="sub">A tool is defined by its limits as much as its features. These are deliberate.</p>
+      <ul class="refuse">
+        <li><span class="x">✕</span><span><b>RFC.</b> Classic RFC needs SAP's proprietary NW RFC SDK, which is not redistributable. Any “pure Rust RFC” crate either bundles it or reimplements an unsupported stack.</span></li>
+        <li><span class="x">✕</span><span><b>Silent partial reads.</b> Malformed XML returns an error, not a half-parsed tree. A truncated IDoc is worse than no IDoc.</span></li>
+        <li><span class="x">✕</span><span><b>Generic “SAP client” claims.</b> This is OData and IDoc, tested offline. It has not been run against a live system yet — and says so.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="evidence">
+    <div class="wrap">
+      <h2>Evidence, not adjectives</h2>
+      <p class="sub">Run these yourself. The numbers come from the repository, not from a slide.</p>
+      <table class="ev">
+        <thead><tr><th>Check</th><th>Command</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Unit tests</td><td><code>cargo test</code></td><td class="pass">8 passed</td></tr>
+          <tr><td>Lints</td><td><code>cargo clippy</code></td><td class="pass">0 findings</td></tr>
+          <tr><td>Release build</td><td><code>cargo build --release</code></td><td class="pass">1m 15s · 5.06 MB</td></tr>
+          <tr><td>Clean clone</td><td><code>git clone &amp;&amp; cargo test</code></td><td class="pass">8 passed</td></tr>
+          <tr><td>Live SAP system</td><td>—</td><td style="color:var(--warn)">not yet</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="use">
+    <div class="wrap">
+      <h2>Use it</h2>
+      <p class="sub">One binary, no runtime to install.</p>
+      <div class="use">
+        <div class="term" style="margin:0">
+          <div class="term-bar">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <span class="term-title">quickstart</span>
+          </div>
+<pre class="wrapcode"><span class="cmd">git clone git@github.com:CenturionB6/RUST4SAP.git</span>
+<span class="cmd">cd RUST4SAP &amp;&amp; cargo build --release</span>
+
+<span class="cmd">export SAP_ODATA_ROOT=https://sap.example/sap/opu/odata/sap/API_BUSINESS_PARTNER</span>
+<span class="cmd">export SAP_USER=...</span> <span class="cmd">SAP_PASSWORD=...</span>
+
+<span class="cmd">./target/release/rust4sap odata service</span>
+<span class="cmd">./target/release/rust4sap idoc docs/order.xml</span></pre>
+        </div>
+        <div>
+          <ol class="steps">
+            <li><span>Rust 1.75+ and a C toolchain — nothing else.</span></li>
+            <li><span>Credentials from flags or environment, never a config file in the repo.</span></li>
+            <li><span>Output is JSON on stdout, so it pipes straight into <code>jq</code> or a queue.</span></li>
+            <li><span>Exit codes are meaningful: a non-zero status means the read failed.</span></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span>MIT licensed · Rust 1.98 · built on macOS, developed for Linux and Windows</span>
+    <span><a href="https://github.com/CenturionB6/RUST4SAP">github.com/CenturionB6/RUST4SAP</a></span>
+  </div>
+</footer>
+</body>
+</html>
