@@ -11,23 +11,25 @@ exists to prevent.
 | path | what it is |
 |---|---|
 | `index.html` | the landing page |
-| `preview.html` | byte-identical copy of `index.html`, regenerated on every sync; exists so a reviewer can fetch a URL that has never been cached |
+| `preview.html` | byte-identical copy of `index.html` plus `noindex`, regenerated on every sync; exists only so a reviewer can fetch a URL that has never been cached. Not a second page: it is never edited, and search engines are told to ignore it |
 | `demo/rbac-abac.html` | the interactive ABAC demo |
 | `demo/decisions.json` | decisions exported by the Rust policy engine; the page replays them and never re-implements the policy |
-| `demo/classify.mjs` | the page's only decision logic: refuses to render a decision whose schema it does not recognise |
+| `demo/classify.mjs` | a **render gate, not a policy engine**: it checks the exported schema version, reads the engine's `outcome`, and decides whether the page may display facts or illuminate an outcome. It never decides access — an unrecognised schema produces `UNKNOWN`, not a guess |
 | `deck/sap-abac-mcp-gateway.pptx` | the 8-slide presentation |
 | `img/` | screenshot used on the landing page |
 | `.github/ISSUE_TEMPLATE/` | access-request template linked from the page |
 
 ## How it is built
 
-`docs/index.html` in the private repository is the source of truth. A sync script copies it here
-and regenerates `preview.html` from it, so there is one design rather than two.
+The site source lives in the private repository and is copied here by a sync script, which then
+regenerates `preview.html` from `index.html`. There is one design rather than two; this repository
+is output, never edited by hand.
 
 ## Demo data
 
 Everything in `demo/decisions.json` is synthetic: fictional business partners (`Muster`,
-`Dupont`), sequential IDs (`0000100001`), placeholder IBANs (`DE00 0000 0000 0000 0001`). The
+`Dupont`), sequential IDs (`0000100001`), and **deliberately invalid** IBANs — the placeholders are
+20 characters, where a real German IBAN has 22, so they cannot validate as an account. The
 file contains no hostnames, no tenant identifiers and no real SAP data. It does contain the demo
 policy's internal role names and rule ids, which is deliberate: the demo's purpose is to show
 which rule produced which answer.
