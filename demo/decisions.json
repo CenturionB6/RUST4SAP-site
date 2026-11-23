@@ -20,7 +20,7 @@
           "why": "all conditions met"
         },
         {
-          "rule": "controller-all-partners",
+          "rule": "controller-region-partners",
           "effect": "allow",
           "matched": false,
           "why": "role not in [\"SAP_BR_FIN_CONTROLLER\"]; clearance 1 < required 2"
@@ -55,7 +55,7 @@
       "subject_region": "DE",
       "asks_about": "DE",
       "allowed": true,
-      "reason": "allowed by controller-all-partners",
+      "reason": "allowed by controller-region-partners",
       "evidence": [
         {
           "rule": "buyer-de-partners",
@@ -64,7 +64,7 @@
           "why": "role not in [\"SAP_BR_BUYER\"]"
         },
         {
-          "rule": "controller-all-partners",
+          "rule": "controller-region-partners",
           "effect": "allow",
           "matched": true,
           "why": "all conditions met"
@@ -94,6 +94,40 @@
       ]
     },
     {
+      "id": "controller-de-fr",
+      "employee": "controller (DE) asks about FR",
+      "role": "SAP_BR_FIN_CONTROLLER",
+      "clearance": 2,
+      "subject_region": "DE",
+      "asks_about": "FR",
+      "allowed": false,
+      "reason": "no rule allows this request (deny by default)",
+      "evidence": [
+        {
+          "rule": "buyer-de-partners",
+          "effect": "allow",
+          "matched": false,
+          "why": "role not in [\"SAP_BR_BUYER\"]; region DE != record region FR"
+        },
+        {
+          "rule": "controller-region-partners",
+          "effect": "allow",
+          "matched": false,
+          "why": "region DE != record region FR"
+        },
+        {
+          "rule": "external-no-finance",
+          "effect": "deny",
+          "matched": false,
+          "why": "clearance 2 > ceiling 0"
+        }
+      ],
+      "permitted_fields": [],
+      "rows_returned": 0,
+      "rows_dropped": 3,
+      "records": []
+    },
+    {
       "id": "clerk-fr",
       "employee": "clerk (FR)",
       "role": "SAP_BR_BUYER",
@@ -110,7 +144,7 @@
           "why": "all conditions met"
         },
         {
-          "rule": "controller-all-partners",
+          "rule": "controller-region-partners",
           "effect": "allow",
           "matched": false,
           "why": "role not in [\"SAP_BR_FIN_CONTROLLER\"]; clearance 1 < required 2"
@@ -154,10 +188,10 @@
           "why": "region FR != record region DE"
         },
         {
-          "rule": "controller-all-partners",
+          "rule": "controller-region-partners",
           "effect": "allow",
           "matched": false,
-          "why": "role not in [\"SAP_BR_FIN_CONTROLLER\"]; clearance 1 < required 2"
+          "why": "role not in [\"SAP_BR_FIN_CONTROLLER\"]; clearance 1 < required 2; region FR != record region DE"
         },
         {
           "rule": "external-no-finance",
@@ -188,7 +222,7 @@
           "why": "role not in [\"SAP_BR_BUYER\"]; clearance 0 < required 1"
         },
         {
-          "rule": "controller-all-partners",
+          "rule": "controller-region-partners",
           "effect": "allow",
           "matched": false,
           "why": "role not in [\"SAP_BR_FIN_CONTROLLER\"]; clearance 0 < required 2"
@@ -222,7 +256,7 @@
           "why": "role not in [\"SAP_BR_BUYER\"]"
         },
         {
-          "rule": "controller-all-partners",
+          "rule": "controller-region-partners",
           "effect": "allow",
           "matched": false,
           "why": "role not in [\"SAP_BR_FIN_CONTROLLER\"]; clearance 1 < required 2"
