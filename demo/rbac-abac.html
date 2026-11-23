@@ -84,8 +84,9 @@
   .badge.allow { background: rgba(70,193,125,.14); color: var(--ok); }
   .badge.deny { background: rgba(242,86,77,.14); color: var(--deny); }
   .badge.conditional { background: rgba(217,161,59,.14); color: var(--warn); }
+  .badge.unknown { background: rgba(139,147,158,.14); color: var(--muted); }
   .reason { color: var(--muted); font-size: 13px; }
-  .facts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 0 0 16px; }
+  .facts { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 0 0 16px; }
   @media (max-width: 760px) { .facts { grid-template-columns: repeat(2, 1fr); } }
   .facts dt { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .07em; }
   .facts dd { margin: 3px 0 0; font: 500 13px/1.4 ui-monospace, monospace; }
@@ -250,6 +251,7 @@
         <div><dt>rows returned</dt><dd id="rows">—</dd></div>
         <div><dt>rows dropped</dt><dd id="dropped">—</dd></div>
         <div><dt>policy</dt><dd id="policy">—</dd></div>
+        <div><dt>row scope</dt><dd id="scope">—</dd></div>
       </dl>
       <table class="evidence">
         <thead><tr><th>rule</th><th>effect</th><th>matched</th><th>why</th></tr></thead>
@@ -304,21 +306,48 @@
     })
     .catch(() => { warn.hidden = false; askBtn.disabled = true; });
 
+  const UNKNOWN = {
+    outcome: 'unknown',
+    reason: 'decision metadata is missing or from an unsupported schema — republish decisions.json',
+    permitted_fields: [], rows_returned: 0, rows_dropped: 0, evidence: [], records: [],
+    allowed: false, row_filtered: false,
+  };
+
+  function supported(sc) {
+    return sc && sc.schema_version === 2 && ['allow', 'conditional', 'deny'].includes(sc.outcome);
+  }
+
   askBtn.addEventListener('click', () => {
     if (!data) return;
-    const sc = data.scenarios[Number(who.value)];
+    const raw = data.scenarios[Number(who.value)];
+    const stale = !supported(raw);
+    const sc = stale ? UNKNOWN : raw;
     result.hidden = false;
-    // three outcomes, the same three the diagram draws: full grant, redacted grant, refusal
-    const FIELDS_TOTAL = 4;                       // BusinessPartner, LastName, Region, IBAN
-    const outcome = !sc.allowed ? 'deny'
-                  : (sc.permitted_fields.length >= FIELDS_TOTAL ? 'allow' : 'conditional');
-    const badge = document.getElementById('badge');
-    badge.textContent = outcome.toUpperCase();
-    badge.className = 'badge ' + outcome;
+    const badgeEl = document.getElementById('badge');
+    badgeEl.textContent = sc.outcome.toUpperCase();
+    badgeEl.className = 'badge ' + sc.outcome;
+    if (stale) {
+      results.forEach(el => el.classList.remove('lit'));
+      pinned = true;
+      document.getElementById('reason').textContent = UNKNOWN.reason;
+      ['fields', 'rows', 'dropped', 'scope', 'policy', 'records', 'evidence'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = '—';
+      });
+      document.getElementById('evidence').innerHTML = '';
+      return;
+    }
+    // the engine classified this; the page only displays it
+    const outcome = sc.outcome;
     document.getElementById('reason').textContent = sc.reason;
-    document.getElementById('fields').textContent = sc.permitted_fields.length ? sc.permitted_fields.join(', ') : '—';
+    document.getElementById('fields').textContent =
+      sc.permitted_fields.length ? sc.permitted_fields.join(', ') : '—';
     document.getElementById('rows').textContent = String(sc.rows_returned);
     document.getElementById('dropped').textContent = String(sc.rows_dropped);
+    // row filtering is its own fact, never folded into "allow"
+    document.getElementById('scope').textContent = sc.allowed
+      ? (sc.row_filtered ? sc.rows_dropped + ' rows outside scope' : 'all rows in scope returned')
+      : 'request refused — no rows fetched';
     document.getElementById('evidence').innerHTML = sc.evidence.map(e =>
       '<tr><td>' + e.rule + '</td><td>' + e.effect + '</td><td>' + (e.matched ? 'yes' : 'no') +
       '</td><td>' + e.why + '</td></tr>').join('');

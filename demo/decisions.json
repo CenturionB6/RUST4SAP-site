@@ -4,6 +4,8 @@
   "note": "Decisions computed by the Rust engine at export time; the page replays them and does not re-implement the policy.",
   "scenarios": [
     {
+      "schema_version": 2,
+      "outcome": "conditional",
       "id": "clerk-de",
       "employee": "clerk (DE)",
       "role": "SAP_BR_BUYER",
@@ -11,6 +13,8 @@
       "subject_region": "DE",
       "asks_about": "DE",
       "allowed": true,
+      "row_filtered": true,
+      "rows_in_scope": 1,
       "reason": "allowed by buyer-de-partners",
       "evidence": [
         {
@@ -37,6 +41,27 @@
         "LastName",
         "Region"
       ],
+      "fields_total": 4,
+      "fields_returned": 3,
+      "source_fields": [
+        "BusinessPartner",
+        "IBAN",
+        "LastName",
+        "Region"
+      ],
+      "returned_fields": [
+        "BusinessPartner",
+        "LastName",
+        "Region"
+      ],
+      "redacted": true,
+      "records_meta": [
+        {
+          "source_fields": 4,
+          "returned_fields": 3,
+          "redacted": true
+        }
+      ],
       "rows_returned": 1,
       "rows_dropped": 2,
       "records": [
@@ -48,6 +73,8 @@
       ]
     },
     {
+      "schema_version": 2,
+      "outcome": "allow",
       "id": "controller-de",
       "employee": "controller (DE)",
       "role": "SAP_BR_FIN_CONTROLLER",
@@ -55,6 +82,8 @@
       "subject_region": "DE",
       "asks_about": "DE",
       "allowed": true,
+      "row_filtered": true,
+      "rows_in_scope": 1,
       "reason": "allowed by controller-region-partners",
       "evidence": [
         {
@@ -82,6 +111,28 @@
         "LastName",
         "Region"
       ],
+      "fields_total": 4,
+      "fields_returned": 4,
+      "source_fields": [
+        "BusinessPartner",
+        "IBAN",
+        "LastName",
+        "Region"
+      ],
+      "returned_fields": [
+        "BusinessPartner",
+        "IBAN",
+        "LastName",
+        "Region"
+      ],
+      "redacted": false,
+      "records_meta": [
+        {
+          "source_fields": 4,
+          "returned_fields": 4,
+          "redacted": false
+        }
+      ],
       "rows_returned": 1,
       "rows_dropped": 2,
       "records": [
@@ -94,6 +145,8 @@
       ]
     },
     {
+      "schema_version": 2,
+      "outcome": "deny",
       "id": "controller-de-fr",
       "employee": "controller (DE) asks about FR",
       "role": "SAP_BR_FIN_CONTROLLER",
@@ -101,6 +154,8 @@
       "subject_region": "DE",
       "asks_about": "FR",
       "allowed": false,
+      "row_filtered": false,
+      "rows_in_scope": 1,
       "reason": "no rule allows this request (deny by default)",
       "evidence": [
         {
@@ -123,11 +178,19 @@
         }
       ],
       "permitted_fields": [],
+      "fields_total": 0,
+      "fields_returned": 0,
+      "source_fields": [],
+      "returned_fields": [],
+      "redacted": false,
+      "records_meta": [],
       "rows_returned": 0,
       "rows_dropped": 3,
       "records": []
     },
     {
+      "schema_version": 2,
+      "outcome": "conditional",
       "id": "clerk-fr",
       "employee": "clerk (FR)",
       "role": "SAP_BR_BUYER",
@@ -135,6 +198,8 @@
       "subject_region": "FR",
       "asks_about": "FR",
       "allowed": true,
+      "row_filtered": true,
+      "rows_in_scope": 1,
       "reason": "allowed by buyer-de-partners",
       "evidence": [
         {
@@ -161,6 +226,27 @@
         "LastName",
         "Region"
       ],
+      "fields_total": 4,
+      "fields_returned": 3,
+      "source_fields": [
+        "BusinessPartner",
+        "IBAN",
+        "LastName",
+        "Region"
+      ],
+      "returned_fields": [
+        "BusinessPartner",
+        "LastName",
+        "Region"
+      ],
+      "redacted": true,
+      "records_meta": [
+        {
+          "source_fields": 4,
+          "returned_fields": 3,
+          "redacted": true
+        }
+      ],
       "rows_returned": 1,
       "rows_dropped": 2,
       "records": [
@@ -172,6 +258,8 @@
       ]
     },
     {
+      "schema_version": 2,
+      "outcome": "deny",
       "id": "clerk-fr-de",
       "employee": "clerk (FR) asks about DE",
       "role": "SAP_BR_BUYER",
@@ -179,6 +267,8 @@
       "subject_region": "FR",
       "asks_about": "DE",
       "allowed": false,
+      "row_filtered": false,
+      "rows_in_scope": 1,
       "reason": "no rule allows this request (deny by default)",
       "evidence": [
         {
@@ -201,11 +291,19 @@
         }
       ],
       "permitted_fields": [],
+      "fields_total": 0,
+      "fields_returned": 0,
+      "source_fields": [],
+      "returned_fields": [],
+      "redacted": false,
+      "records_meta": [],
       "rows_returned": 0,
       "rows_dropped": 3,
       "records": []
     },
     {
+      "schema_version": 2,
+      "outcome": "deny",
       "id": "external-de",
       "employee": "external auditor",
       "role": "SAP_BR_AUDITOR",
@@ -213,6 +311,8 @@
       "subject_region": "DE",
       "asks_about": "DE",
       "allowed": false,
+      "row_filtered": false,
+      "rows_in_scope": 1,
       "reason": "denied by external-no-finance: all conditions met",
       "evidence": [
         {
@@ -235,11 +335,19 @@
         }
       ],
       "permitted_fields": [],
+      "fields_total": 0,
+      "fields_returned": 0,
+      "source_fields": [],
+      "returned_fields": [],
+      "redacted": false,
+      "records_meta": [],
       "rows_returned": 0,
       "rows_dropped": 3,
       "records": []
     },
     {
+      "schema_version": 2,
+      "outcome": "deny",
       "id": "intern-de",
       "employee": "intern (DE)",
       "role": "SAP_BR_INTERN",
@@ -247,6 +355,8 @@
       "subject_region": "DE",
       "asks_about": "DE",
       "allowed": false,
+      "row_filtered": false,
+      "rows_in_scope": 1,
       "reason": "no rule allows this request (deny by default)",
       "evidence": [
         {
@@ -269,6 +379,12 @@
         }
       ],
       "permitted_fields": [],
+      "fields_total": 0,
+      "fields_returned": 0,
+      "source_fields": [],
+      "returned_fields": [],
+      "redacted": false,
+      "records_meta": [],
       "rows_returned": 0,
       "rows_dropped": 3,
       "records": []
