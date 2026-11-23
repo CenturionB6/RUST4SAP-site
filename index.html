@@ -236,7 +236,7 @@
           <span class="dot"></span><span class="dot"></span><span class="dot"></span>
           <span class="term-title">sap_check_access — German controller, French records</span>
         </div>
-<pre><span class="c"># excerpt of a real tools/call response, reflowed for width</span>
+<pre><span class="c"># Excerpt from the engine's decision trace for this scenario (reflowed for width)</span>
 <span class="cmd">$ tools/call sap_check_access</span>
 <span class="c">  entity: A_BusinessPartner   action: read   record_region: FR</span>
 <span class="c">  subject: controller (DE) — clearance 2, region DE</span>
@@ -326,10 +326,10 @@
       <div class="paths">
         <article class="card">
           <h3>Why Rust</h3>
-          <p>One static binary, no runtime beside SAP, no garbage collector in the request path.
-             The policy decision itself measures <b>~3 µs</b> on this machine (200,000 evaluations,
-             release build), so the cost of a request is the network, not the rules. The core is
-             ~3,900 lines across 23 modules, with 14 direct dependencies.</p>
+          <p><b>Designed to enforce authorization in the request path.</b> One static binary, no
+             runtime beside SAP, no garbage collector between the request and the answer. A documented Rust
+             implementation with 134 tests, 37 of them public: the policy engine and those tests can
+             be read and run, rather than taken on trust.</p>
         </article>
         <article class="card">
           <h3>Who it is for</h3>
@@ -512,10 +512,6 @@
 <span class="c"># the gateway is its own workspace, with its own target directory</span>
 <span class="cmd">(cd mcp &amp;&amp; cargo build --release)</span>
 
-<span class="c"># ISS   = token issuer, e.g. https://kc.example/realms/infloww</span>
-<span class="c"># AUD   = this gateway's audience, e.g. rust4sap-mcp</span>
-<span class="c"># JWKS  = file or URL for the issuer's signing keys</span>
-<span class="c"># ENTS  = JSON mapping subject → roles/region (the entitlement source)</span>
 <span class="cmd">./mcp/target/release/rust4sap-mcp --issuer $ISS --audience $AUD \</span>
 <span class="cmd cont">  --jwks $JWKS --entitlements $ENTS --http 127.0.0.1:8080</span>
 
@@ -530,6 +526,16 @@
             <li><span>Output is JSON on stdout, so it pipes straight into <code>jq</code> or a queue.</span></li>
             <li><span>Exit codes are meaningful: a non-zero status means the read failed.</span></li>
           </ol>
+          <table class="ev" style="margin-top:22px">
+            <thead><tr><th>Variable</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>ISS</code></td><td>trusted token issuer, e.g. <code>https://kc.example/realms/dev</code></td></tr>
+              <tr><td><code>AUD</code></td><td>the audience this gateway expects, e.g. <code>rust4sap-mcp</code></td></tr>
+              <tr><td><code>JWKS</code></td><td>path to the issuer's JWKS file passed to <code>--jwks</code>; use <code>--jwks-url</code> instead for a rotating endpoint</td></tr>
+              <tr><td><code>ENTS</code></td><td>path to a JSON file mapping subject → roles and region, passed to <code>--entitlements</code></td></tr>
+            </tbody>
+          </table>
+          <p class="micro" style="margin-top:10px">Examples are for local development; production values come from the deployment configuration, not from a page.</p>
         </div>
       </div>
     </div>
