@@ -125,6 +125,10 @@
 
   /* evidence table */
   table.ev { width: 100%; border-collapse: collapse; font-size: 14px; }
+  @media (max-width: 640px) {
+    table.ev { display: block; overflow-x: auto; white-space: nowrap; }
+    table.ev > thead, table.ev > tbody { display: table; width: 100%; min-width: max-content; }
+  }
   table.ev th, table.ev td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--line); }
   table.ev th { color: var(--muted); font-weight: 500; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
   table.ev td:last-child { text-align: right; font-family: ui-monospace, monospace; }
