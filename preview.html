@@ -197,12 +197,12 @@
   <div class="wrap nav">
     <div class="brand"><span class="mark">R4</span> RUST4SAP</div>
     <nav class="links">
+      <a class="link" href="#how">How it works</a>
       <a class="link" href="#demo">Demo</a>
-      <a class="link" href="#about">About</a>
-      <a class="link" href="#paths">Paths</a>
+      <a class="link" href="#limits">Limits</a>
       <a class="link" href="#status">Status</a>
       <a class="link" href="#evidence">Evidence</a>
-      <a class="link" href="#slides">Slides</a>
+      <a class="link" href="#threat-model">Threat model</a>
       <a class="link" href="#use">Use it</a>
     </nav>
     <a class="btn" href="https://github.com/CenturionB6/RUST4SAP-site">Docs</a>
@@ -231,28 +231,66 @@
         <a class="btn ghost" href="#" data-mail="access">Request access</a>
       </div>
 
-      <div class="term" aria-label="Terminal output from rust4sap">
+      <div class="term" aria-label="The gateway refusing a cross-region read">
         <div class="term-bar">
           <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-          <span class="term-title">rust4sap idoc order.xml --flat</span>
+          <span class="term-title">sap_check_access — German controller, French records</span>
         </div>
-<pre><span class="cmd">rust4sap idoc order.xml --flat</span>
-<span class="k">EDI_DC40-IDOCTYP</span>   <span class="s">ORDERS05</span>
-<span class="k">EDI_DC40-MESTYP</span>    <span class="s">ORDERS</span>
-<span class="k">EDI_DC40-DIRECT</span>    <span class="s">2</span>
-<span class="k">E1EDK01-BELNR</span>      <span class="s">4500012345</span>
-<span class="k">E1EDK01-CURCY</span>      <span class="s">EUR</span>
+<pre><span class="cmd">$ tools/call sap_check_access</span>
+<span class="c">  entity: A_BusinessPartner   action: read   record_region: FR</span>
+<span class="c">  subject: controller (DE) — clearance 2, region DE</span>
 
-<span class="cmd">rust4sap odata --root $SAP_ODATA_ROOT get A_BusinessPartner \</span>
-<span class="cmd cont">  --top 5 --select 'BusinessPartner,LastName' --filter "Country eq 'DE'"</span>
-<span class="c">{ "d": { "results": [</span>
-<span class="c">  { "BusinessPartner": "0000100001", "LastName": "Muster" }</span>
-<span class="ok">  … 4 more</span>
-<span class="c">] } }</span></pre>
+<span class="k">allowed</span>   <span class="x" style="color:var(--deny)">false</span>
+<span class="k">reason</span>    <span class="s">no rule allows this request (deny by default)</span>
+<span class="k">evidence</span>
+  buyer-de-partners           allow  matched=false  <span class="c">role not in ["SAP_BR_BUYER"]</span>
+  controller-region-partners  allow  matched=false  <span class="s">region DE != record region FR</span>
+  external-no-finance         deny   matched=false  <span class="c">clearance 2 &gt; ceiling 0</span>
+<span class="ok">→ 0 rows returned</span></pre>
       </div>
     </div>
   </section>
 
+
+
+  <section id="problem">
+    <div class="wrap">
+      <div class="eyebrow">The problem</div>
+      <h2 style="margin-top:12px">An agent connected to SAP sees everything the account can see.</h2>
+      <p class="sub">
+        Give an AI assistant a service account and it inherits the account's reach. Every question it
+        asks is answered with the same breadth, whether the person behind it is a buyer who should see
+        a partner's name, or a controller who may also see its bank details. Prompt injection makes it
+        worse: the attacker does not need the credentials, only a sentence that changes the question.
+        And once a record is in the model's context, it has left your perimeter.
+      </p>
+      <p class="sub">
+        An API gateway does not fix this. It authenticates the caller and rate-limits them, but it does
+        not know that clearance buys sensitivity and not geography. That knowledge has to sit in the
+        path between the agent and SAP, and it has to be enforced somewhere the model cannot argue with.
+      </p>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="wrap">
+      <div class="eyebrow">How it works</div>
+      <h2 style="margin-top:12px">Four steps, one of which the model cannot influence.</h2>
+      <div class="paths">
+        <article class="card"><h3>1 · The agent asks</h3>
+          <p>An MCP tool call arrives with the employee's delegated token and the client's token.</p></article>
+        <article class="card"><h3>2 · Rust verifies</h3>
+          <p>Signature, issuer, audience, expiry, delegation binding — then entitlements are resolved
+             from the authoritative source. Only then does a subject exist.</p></article>
+        <article class="card"><h3>3 · ABAC decides</h3>
+          <p>Deny by default. Rules from the employee's attributes decide which entity, which region and
+             which fields, and every rule records why it matched or did not.</p></article>
+        <article class="card"><h3>4 · SAP executes</h3>
+          <p>Only an allowed request reaches the connector. Fields outside the grant are projected away
+             before the model sees a byte, and the decision is written to the audit chain first.</p></article>
+      </div>
+    </div>
+  </section>
 
   <section id="demo" style="border-top:1px solid var(--line)">
     <div class="wrap">
@@ -276,78 +314,37 @@
 <section id="about">
     <div class="wrap">
       <div class="eyebrow">About</div>
-      <h2 style="margin-top:12px">A small, honest tool for the gap between SAP and everything else.</h2>
+      <h2 style="margin-top:12px">Why a gateway, and why Rust.</h2>
       <p class="sub">
-        SAP holds the records a company runs on. Getting those records into modern software usually
-        means a middleware licence, a JVM, an RFC SDK, or a consultant. RUST4SAP exists to make the
-        two open paths — OData and IDoc — available from one binary you can read in an afternoon.
+        SAP holds the records a company runs on, and the two open paths into it are OData and IDoc.
+        Everything else — RFC, BAPI, middleware — needs a proprietary SDK, a JVM, or a licence. A
+        gateway that decides what each agent may read has to sit on those two paths and be small
+        enough to audit, fast enough to sit in the request path, and boring enough that a security
+        team will read it.
       </p>
-
-      <div class="audience">
+      <div class="paths">
         <article class="card">
-          <h3>SAP developers</h3>
-          <p>Read a service contract, list entity sets, pull a collection, parse an IDoc dump —
-             without leaving the terminal or installing an SAP GUI. Output is JSON, so it composes
-             with the tools you already use.</p>
-        </article>
-        <article class="card">
-          <h3>Teams evaluating integration</h3>
-          <p>If a project only needs to <em>read</em> SAP data, a full middleware stack is often
-             the wrong first answer. This is a two-command proof of concept that costs nothing to
-             try and nothing to drop.</p>
-        </article>
-        <article class="card">
-          <h3>Platform and data engineers</h3>
-          <p>One static binary, no runtime, no daemon. It runs in a container, in CI, or on the same
-             host as your loader — and it exits with a meaningful status code.</p>
-        </article>
-      </div>
-
-      <div class="access">
-        <div>
-          <h3>Want to explore RUST4SAP?</h3>
-          <p>
-            The source repository is currently private. If you are an SAP developer, integration
-            engineer, or potential contributor evaluating the project, request access by email —
-            use the button, or open a public issue if you prefer. The policy engine and its tests
-            are already public at
-            <a href="https://github.com/CenturionB6/rust4sap-samples" style="color:var(--accent)">rust4sap-samples</a>,
-            so you can judge the ABAC behaviour before asking for anything.
-          </p>
-        </div>
-        <div class="access-cta">
-          <a class="btn primary" href="#" data-mail="access">Email for access</a>
-          <a class="btn ghost" title="GitHub account required. Access requests are public." href="https://github.com/CenturionB6/RUST4SAP-site/issues/new?labels=access-request&template=access-request.yml&title=Access+request%3A+">or open a public issue</a>
-          <span class="micro">GitHub account required. Access requests are public.</span>
-        </div>
-      </div>
-
-      <div class="why">
-        <div>
           <h3>Why Rust</h3>
-          <p>Not for speed. For <b>deployability</b>: a single binary with no garbage collector
-             pause, no JVM to patch, no interpreter to match. TLS comes from rustls, so there is no
-             OpenSSL version to reconcile with a customer's base image.</p>
-        </div>
-        <div>
-          <h3>What it is not</h3>
-          <ul class="refuse" style="margin-top:10px">
-            <li><span class="x">✕</span><span><b>A full SAP connector.</b> No BAPI, no IDoc <em>sending</em>, no RFC, no CDS modelling.</span></li>
-            <li><span class="x">✕</span><span><b>Production-proven against SAP.</b> It parses real formats and passes its tests; it has not yet run against a live system.</span></li>
-            <li><span class="x">✕</span><span><b>A middleware replacement.</b> If you need orchestration, retries and mapping across fifty interfaces, buy one.</span></li>
-          </ul>
-        </div>
+          <p>One static binary, no runtime to install beside SAP, no garbage collector in the request
+             path, and memory safety enforced by the compiler rather than by review. The dependency
+             list is short on purpose: the parts that matter are readable in an afternoon.</p>
+        </article>
+        <article class="card">
+          <h3>Who it is for</h3>
+          <p>Platform and security teams putting an assistant in front of SAP; integration engineers
+             who need OData and IDoc without a middleware licence; SAP developers who want JSON on
+             stdout and a meaningful exit code.</p>
+        </article>
       </div>
     </div>
   </section>
 
   <section id="paths">
     <div class="wrap">
-      <h2>Two paths that actually work</h2>
+      <h2>The foundation: OData and IDoc.</h2>
       <p class="sub">SAP speaks many protocols. Only two of them are open enough to build on without a licence negotiation.</p>
       <div class="grid2">
         <article class="card">
-          <span class="tag on">working</span>
           <h3>OData</h3>
           <p>HTTP and JSON. Read <code>$metadata</code>, list entity sets, query collections with
              <code>$top</code>, <code>$select</code>, <code>$filter</code>, <code>$orderby</code>.
@@ -355,7 +352,6 @@
 <pre style="padding:0;background:none"><span class="cmd">cargo run -- odata --root $SAP_ODATA_ROOT metadata</span></pre>
         </article>
         <article class="card">
-          <span class="tag on">working</span>
           <h3>IDoc</h3>
           <p>XML documents with numbered segments. Parsed into a typed tree, or flattened to
              <code>SEGMENT-FIELD</code> pairs for loading. Malformed input fails closed.</p>
@@ -424,21 +420,29 @@
         <li><span class="k" style="color:var(--accent)">·</span><span><b>vs. an API gateway.</b> An API gateway authenticates callers and rate-limits them. It does not know that a buyer may see a business partner's name but not its IBAN, or that clearance buys sensitivity but not geography.</span></li>
       </ul>
       <p class="sub" style="margin-top:22px">
-        Built and maintained by <b>CenturionB6</b>.
-        <a href="#" data-mail="hello" style="color:var(--accent)">email the author</a>
-        — the fastest way to ask a question or request access.
+
       </p>
     </div>
   </section>
 
-  <section id="refusal">
+  <section id="limits">
     <div class="wrap">
-      <h2>What it refuses to do — and what that costs.</h2>
-      <p class="sub">A tool is defined by its limits as much as its features. These are deliberate.</p>
+      <div class="eyebrow">Limits</div>
+      <h2 style="margin-top:12px">What it refuses, and what that costs you.</h2>
+      <p class="sub">A tool is defined by its limits. These are deliberate, and each has a price.</p>
       <ul class="refuse">
-        <li><span class="x">✕</span><span><b>RFC.</b> Classic RFC needs SAP's proprietary NW RFC SDK, which is not redistributable. Any “pure Rust RFC” crate either bundles it or reimplements an unsupported stack.</span></li>
-        <li><span class="x">✕</span><span><b>Silent partial reads.</b> Malformed XML returns an error, not a half-parsed tree. A truncated IDoc is worse than no IDoc.</span></li>
-        <li><span class="x">✕</span><span><b>Generic “SAP client” claims.</b> This is OData and IDoc, tested offline. It has not been run against a live system yet — and says so.</span></li>
+        <li><span class="x">✕</span><span><b>RFC, BAPI and IDoc sending.</b> Only OData reads and IDoc
+          parsing. <em>Cost:</em> if your integration needs RFC, this is the wrong tool and will stay wrong.</span></li>
+        <li><span class="x">✕</span><span><b>Silent partial reads.</b> Malformed XML is an error, not a
+          half-parsed tree. <em>Cost:</em> a truncated IDoc stops a pipeline that a lenient parser would have
+          let through — deliberately.</span></li>
+        <li><span class="x">✕</span><span><b>A live SAP connection today.</b> The connector is a mock; no SAP
+          system has been contacted. <em>Cost:</em> you cannot evaluate it against your own landscape yet —
+          only the policy engine and 37 tests are checkable.</span></li>
+        <li><span class="x">✕</span><span><b>A middleware replacement.</b> No orchestration, retries or mapping
+          across fifty interfaces. <em>Cost:</em> if that is the job, buy the middleware.</span></li>
+        <li><span class="x">✕</span><span><b>Sender-constrained tokens.</b> DPoP is planned, not built.
+          <em>Cost:</em> a stolen bearer token is replayable until it expires.</span></li>
       </ul>
     </div>
   </section>
@@ -449,19 +453,19 @@
       <p class="sub">Results from the <b>private</b> repository. The policy engine and its tests are
         published so the ABAC claims can be checked:
         <a href="https://github.com/CenturionB6/rust4sap-samples" style="color:var(--accent)">rust4sap-samples</a>
-        — <code>cargo test</code> there runs 37 of them: the policy engine, the classification rules
-        and the audit chain, including every test that backs the ABAC and audit claims below.
-        Identity and the MCP transport are not public yet.</p>
+        — <code>cargo test</code> there runs 37 of them: the ABAC tests, the classification tests and
+        the audit-chain tests. Identity and the MCP transport are not public yet.</p>
       <table class="ev">
         <thead><tr><th>Check</th><th>Command</th><th>Result</th></tr></thead>
         <tbody>
           <tr><td>Unit + integration tests</td><td><code>cargo test</code></td><td class="pass">134 in the private suite · 37 reproducible in <a href="https://github.com/CenturionB6/rust4sap-samples" style="color:inherit;text-decoration:underline">rust4sap-samples</a></td></tr>
-          <tr><td>&nbsp;&nbsp;identity, delegation, per-request isolation</td><td><code>tests/identity</code>, <code>request_identity</code></td><td class="pass">23</td></tr>
-          <tr><td>&nbsp;&nbsp;ABAC rules, clearance, scope monotonicity</td><td><code>tests/abac</code>, <code>classification</code></td><td class="pass">19</td></tr>
-          <tr><td>&nbsp;&nbsp;JWKS rotation and refresh concurrency</td><td><code>tests/jwks_*</code></td><td class="pass">13</td></tr>
-          <tr><td>&nbsp;&nbsp;audit chain, attribution, torn-tail refusal</td><td><code>tests/audit_*</code>, <code>failure_stage</code></td><td class="pass">26</td></tr>
-          <tr><td>&nbsp;&nbsp;edge admission, expiry, audience, spoofing</td><td><code>tests/access_edge</code>, <code>http_transport</code></td><td class="pass">14</td></tr>
-          <tr><td>&nbsp;&nbsp;public export leakage, pseudonyms</td><td><code>tests/public_*</code></td><td class="pass">15</td></tr>
+          <tr><td>&nbsp;&nbsp;identity, delegation, per-request isolation</td><td><code>identity · request_identity · failure_stage · entitlement_cache</code></td><td class="pass">34</td></tr>
+          <tr><td>&nbsp;&nbsp;ABAC rules, clearance, classification</td><td><code>abac · classification · outcome · export_shape</code></td><td class="pass">26</td></tr>
+          <tr><td>&nbsp;&nbsp;JWKS rotation, refresh concurrency</td><td><code>jwks_rotation · jwks_concurrency</code></td><td class="pass">13</td></tr>
+          <tr><td>&nbsp;&nbsp;audit chain, attribution, torn-tail</td><td><code>audit_attribution · audit_versions · audit_integrity · audit unit</code></td><td class="pass">22</td></tr>
+          <tr><td>&nbsp;&nbsp;edge admission, HTTP transport</td><td><code>access_edge · http_transport</code></td><td class="pass">14</td></tr>
+          <tr><td>&nbsp;&nbsp;public export leakage, pseudonyms</td><td><code>public_export · public_leakage</code></td><td class="pass">15</td></tr>
+          <tr><td>&nbsp;&nbsp;tool contracts, server behaviour</td><td><code>src/server.rs unit tests</code></td><td class="pass">10</td></tr>
           <tr><td>Lints</td><td><code>cargo clippy</code></td><td class="pass">0 findings</td></tr>
           <tr><td>Release build</td><td><code>cargo build --release</code></td><td class="pass">1m 15s · 5.06 MB</td></tr>
           <tr><td>Clean clone</td><td><code>git clone &amp;&amp; cargo test</code></td><td class="pass">134 passed (private) · 37 (samples)</td></tr>
@@ -471,57 +475,30 @@
     </div>
   </section>
 
-<section id="slides">
-    <div class="wrap">
-      <div class="eyebrow">Presentation</div>
-      <h2 style="margin-top:12px">SAP ABAC MCP Gateway — 8 slides.</h2>
-      <p class="sub">
-        The argument for a security gateway between AI clients and SAP: the problem, the
-        architecture, the policy model, and the four-employee demonstration where the same question
-        returns different data because the attributes differ.
-      </p>
-      <p class="sub" style="margin-top:-18px">
-        Prefer to click rather than read? <a href="demo/rbac-abac.html" style="color:var(--accent)">Run the decision live</a> —
-        pick an employee, ask, and see the engine's rule-by-rule answer.
-      </p>
-
-      <div class="slides-grid">
-        <ol class="slide-index">
-          <li>Product vision and introduction</li>
-          <li>The business problem</li>
-          <li>Rust MCP architecture</li>
-          <li>End-to-end authorisation flow</li>
-          <li>ABAC policy model</li>
-          <li>Two employees, different results</li>
-          <li>MVP scope and capabilities</li>
-          <li>Decisions and next steps</li>
-        </ol>
-        <div class="slides-cta">
-          <a class="btn primary" href="deck/sap-abac-mcp-gateway.pptx" download>Download the deck (47 KB)</a>
-          <span class="micro">PowerPoint (.pptx) · 16:9 · editable text, no images</span>
-          <a class="btn ghost" href="demo/rbac-abac.html">Try the decision live</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <section id="use">
     <div class="wrap">
       <h2>Use it</h2>
-      <p class="sub">One binary, no runtime to install.</p>
+      <p class="sub">Try the public extract with no account; the gateway needs access.</p>
       <div class="use">
         <div class="term" style="margin:0">
           <div class="term-bar">
             <span class="dot"></span><span class="dot"></span><span class="dot"></span>
             <span class="term-title">quickstart</span>
           </div>
-<pre class="wrapcode"><span class="c"># source repository is private — request access at the link below or in About, then:</span>
+<pre class="wrapcode"><span class="c"># no account needed: the policy engine and its tests are public</span>
+<span class="cmd">git clone https://github.com/CenturionB6/rust4sap-samples</span>
+<span class="cmd">cd rust4sap-samples &amp;&amp; cargo test</span>
+<span class="ok">→ 37 passed</span>
+
+<span class="c"># the gateway itself is in the private repository — request access, then:</span>
 <span class="cmd">git clone git@github.com:CenturionB6/RUST4SAP.git</span>
-<span class="cmd">cd RUST4SAP &amp;&amp; cargo build --release</span>
+<span class="cmd">cd RUST4SAP/mcp &amp;&amp; cargo build --release</span>
 
-<span class="cmd">export SAP_ODATA_ROOT=https://sap.example/sap/opu/odata/sap/API_BUSINESS_PARTNER</span>
-<span class="cmd">export SAP_USER=...</span> <span class="cmd">SAP_PASSWORD=...</span>
+<span class="c"># stdio (default) or Streamable HTTP; identity travels per call</span>
+<span class="cmd">./target/release/rust4sap-mcp --issuer $ISS --audience $AUD --jwks $JWKS \</span>
+<span class="cmd cont">  --entitlements $ENTS --http 127.0.0.1:8080</span>
 
+<span class="c"># the readers underneath it</span>
 <span class="cmd">./target/release/rust4sap odata service</span>
 <span class="cmd">./target/release/rust4sap idoc docs/order.xml</span></pre>
         </div>
@@ -540,7 +517,8 @@
 
 <footer>
   <div class="wrap foot">
-    <span>MIT licensed · built with Rust 1.98</span>
+    <span>MIT licensed · built with Rust 1.98 · by CenturionB6, <a href="#" data-mail="hello">email</a></span>
+    <span><a href="deck/sap-abac-mcp-gateway.pptx">Download the 8-slide deck (.pptx)</a></span>
     <span><a href="https://github.com/CenturionB6/RUST4SAP-site">github.com/CenturionB6/RUST4SAP-site</a></span>
   </div>
 </footer>
@@ -557,5 +535,12 @@ document.querySelectorAll('[data-mail]').forEach(function (el) {
   });
 });
 </script>
+<noscript>
+  <p style="text-align:center;color:#9aa4b2;font-size:14px;padding:0 24px 24px">
+    Email buttons need JavaScript. Open an
+    <a href="https://github.com/CenturionB6/RUST4SAP-site/issues/new?labels=access-request&amp;template=access-request.yml">access request issue</a>
+    instead.
+  </p>
+</noscript>
 </body>
 </html>
