@@ -142,6 +142,16 @@
   @media (max-width: 940px) { .audience { grid-template-columns: 1fr; } }
   .audience .card h3 { font-size: 15px; }
   .audience .card p { margin: 0; font-size: 14px; line-height: 1.6; }
+  .slides-grid { display: grid; grid-template-columns: 1.25fr .75fr; gap: 32px; align-items: start; }
+  @media (max-width: 820px) { .slides-grid { grid-template-columns: 1fr; gap: 22px; } }
+  .slide-index { margin: 0; padding: 0; list-style: none; counter-reset: sl; }
+  .slide-index li { counter-increment: sl; display: grid; grid-template-columns: 30px 1fr; gap: 8px;
+                    padding: 9px 0; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 14.5px; }
+  .slide-index li:first-child { border-top: 1px solid var(--line); }
+  .slide-index li::before { content: counter(sl, decimal-leading-zero); color: var(--accent);
+                            font: 600 12px/1.7 ui-monospace, monospace; }
+  .slides-cta { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+
   .access { display: flex; align-items: center; justify-content: space-between; gap: 24px;
             margin-top: 26px; padding: 20px 22px; border: 1px solid var(--line);
             border-radius: var(--radius); background: var(--panel); }
@@ -188,6 +198,7 @@
       <a class="link" href="#paths">Paths</a>
       <a class="link" href="#refusal">Limits</a>
       <a class="link" href="#evidence">Evidence</a>
+      <a class="link" href="#slides">Slides</a>
       <a class="link" href="#use">Use it</a>
     </nav>
     <a class="btn" href="https://github.com/CenturionB6/RUST4SAP-site">Docs</a>
@@ -346,6 +357,36 @@
           <tr><td>Live SAP system</td><td>—</td><td style="color:var(--warn)">not yet</td></tr>
         </tbody>
       </table>
+    </div>
+  </section>
+
+<section id="slides">
+    <div class="wrap">
+      <div class="eyebrow">Presentation</div>
+      <h2 style="margin-top:12px">SAP ABAC MCP Gateway — 8 slides.</h2>
+      <p class="sub">
+        The argument for a security gateway between AI clients and SAP: the problem, the
+        architecture, the policy model, and the four-employee demonstration where the same question
+        returns different data because the attributes differ.
+      </p>
+
+      <div class="slides-grid">
+        <ol class="slide-index">
+          <li>Product vision and introduction</li>
+          <li>The business problem</li>
+          <li>Rust MCP architecture</li>
+          <li>End-to-end authorisation flow</li>
+          <li>ABAC policy model</li>
+          <li>Two employees, different results</li>
+          <li>MVP scope and capabilities</li>
+          <li>Decisions and next steps</li>
+        </ol>
+        <div class="slides-cta">
+          <a class="btn primary" href="deck/sap-abac-mcp-gateway.pptx" download>Download the deck (47 KB)</a>
+          <span class="micro">PowerPoint (.pptx) · 16:9 · editable text, no images</span>
+          <a class="btn ghost" href="#about">How the decision is made</a>
+        </div>
+      </div>
     </div>
   </section>
 
