@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>RUST4SAP — SAP integration without the RFC SDK</title>
+<title>RUST4SAP — the gate between AI agents and SAP</title>
 <meta name="page-type" content="software">
 <meta name="site-kind" content="software">
-<meta name="description" content="Rust tooling for SAP: OData reads and IDoc parsing, with no proprietary RFC SDK.">
+<meta name="description" content="A Rust gateway between AI agents and SAP: the server decides what each agent may see from the user's attributes, not from the prompt.">
 <style>
   :root {
     --bg: #08090b;
@@ -224,7 +224,7 @@
       <div class="cta">
         <a class="btn primary" href="demo/rbac-abac.html">Try the live demo</a>
         <a class="btn" href="#evidence">See the evidence</a>
-        <a class="btn ghost" href="mailto:centurionb6@proton.me?subject=RUST4SAP+access+request">Request access</a>
+        <a class="btn ghost" href="#" data-mail="access">Request access</a>
       </div>
 
       <div class="term" aria-label="Terminal output from rust4sap">
@@ -310,7 +310,7 @@
           </p>
         </div>
         <div class="access-cta">
-          <a class="btn primary" href="mailto:centurionb6@proton.me?subject=RUST4SAP+access+request">Email for access</a>
+          <a class="btn primary" href="#" data-mail="access">Email for access</a>
           <a class="btn ghost" title="GitHub account required. Access requests are public." href="https://github.com/CenturionB6/RUST4SAP-site/issues/new?labels=access-request&template=access-request.yml&title=Access+request%3A+">or open a public issue</a>
           <span class="micro">GitHub account required. Access requests are public.</span>
         </div>
@@ -419,7 +419,7 @@
       </ul>
       <p class="sub" style="margin-top:22px">
         Built and maintained by <b>CenturionB6</b>.
-        <a href="mailto:centurionb6@proton.me?subject=RUST4SAP" style="color:var(--accent)">centurionb6@proton.me</a>
+        <a href="#" data-mail="hello" style="color:var(--accent)">email the author</a>
         — the fastest way to ask a question or request access.
       </p>
     </div>
@@ -440,8 +440,11 @@
   <section id="evidence">
     <div class="wrap">
       <h2>Evidence, not adjectives</h2>
-      <p class="sub">Results from the <b>private</b> repository. The test code is not public yet; these
-        are the numbers the suite produces, and the breakdown says what they cover.</p>
+      <p class="sub">Results from the <b>private</b> repository. The policy engine and its tests are
+        published so the ABAC claims can be checked:
+        <a href="https://github.com/CenturionB6/rust4sap-samples" style="color:var(--accent)">rust4sap-samples</a>
+        — <code>cargo test</code> there runs 10 of them. The rest of the suite (identity, MCP,
+        audit) is not public yet.</p>
       <table class="ev">
         <thead><tr><th>Check</th><th>Command</th><th>Result</th></tr></thead>
         <tbody>
@@ -530,9 +533,22 @@
 
 <footer>
   <div class="wrap foot">
-    <span>MIT licensed · Rust 1.98</span>
+    <span>MIT licensed · built with Rust 1.98</span>
     <span><a href="https://github.com/CenturionB6/RUST4SAP-site">github.com/CenturionB6/RUST4SAP-site</a></span>
   </div>
 </footer>
+<script>
+// The address is assembled on click instead of shipped as plain text, so a scraper
+// that reads the HTML source does not get it. It is not secrecy — it raises the cost.
+document.querySelectorAll('[data-mail]').forEach(function (el) {
+  el.addEventListener('click', function (e) {
+    e.preventDefault();
+    var user = ['centurion', 'b6'].join('');
+    var host = ['proton', 'me'].join('.');
+    var subject = el.dataset.mail === 'access' ? 'RUST4SAP access request' : 'RUST4SAP';
+    window.location.href = 'mailto:' + user + '@' + host + '?subject=' + encodeURIComponent(subject);
+  });
+});
+</script>
 </body>
 </html>
