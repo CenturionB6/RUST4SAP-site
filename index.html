@@ -319,9 +319,9 @@
       <p class="sub">
         SAP holds the records a company runs on, and the two open paths into it are OData and IDoc.
         Everything else — RFC, BAPI, middleware — needs a proprietary SDK, a JVM, or a licence. A
-        gateway that decides what each agent may read has to sit on those two paths and be small
-        enough to audit, fast enough to sit in the request path, and boring enough that a security
-        team will read it.
+        gateway that decides what each agent may read has to be designed to sit in the request path.
+        It should make its boundary clear enough for a security team to inspect and operate with
+        confidence.
       </p>
       <div class="paths">
         <article class="card">
@@ -386,12 +386,7 @@
           <tr><td>Live SAP connection</td><td style="color:var(--warn)">not yet</td><td>connector is a mock; no SAP system has been contacted</td></tr>
         </tbody>
       </table>
-      <p class="sub" style="margin-top:18px;font-size:13px">
-        Of these 134, <b>37 are public</b> in <code>rust4sap-samples</code>: 23 of the 26
-        ABAC/classification tests (<code>export_shape</code> is not) and 14 of the 22 audit tests
-        (<code>audit_attribution</code> is not). The 10 server-contract tests, plus identity, JWKS,
-        edge and public-export tests, remain private.
-      </p>
+
     </div>
   </section>
 
@@ -461,8 +456,8 @@
       <p class="sub">Results from the <b>private</b> repository. The policy engine and its tests are
         published so the ABAC claims can be checked:
         <a href="https://github.com/CenturionB6/rust4sap-samples" style="color:var(--accent)">rust4sap-samples</a>
-        — <code>cargo test</code> there runs 37 of them: the ABAC tests, the classification tests and
-        the audit-chain tests. Identity and the MCP transport are not public yet.</p>
+        — <code>cargo test</code> there runs 37 of them. Most of the suite is private; the footnote
+        below says exactly which tests are public.</p>
       <table class="ev">
         <thead><tr><th>Check</th><th>Command</th><th>Result</th></tr></thead>
         <tbody>
