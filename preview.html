@@ -449,12 +449,13 @@
       <p class="sub">Results from the <b>private</b> repository. The policy engine and its tests are
         published so the ABAC claims can be checked:
         <a href="https://github.com/CenturionB6/rust4sap-samples" style="color:var(--accent)">rust4sap-samples</a>
-        — <code>cargo test</code> there runs 10 of them. The rest of the suite (identity, MCP,
-        audit) is not public yet.</p>
+        — <code>cargo test</code> there runs 37 of them: the policy engine, the classification rules
+        and the audit chain, including every test that backs the ABAC and audit claims below.
+        Identity and the MCP transport are not public yet.</p>
       <table class="ev">
         <thead><tr><th>Check</th><th>Command</th><th>Result</th></tr></thead>
         <tbody>
-          <tr><td>Unit + integration tests</td><td><code>cargo test</code></td><td class="pass">134 passed</td></tr>
+          <tr><td>Unit + integration tests</td><td><code>cargo test</code></td><td class="pass">134 in the private suite · 37 reproducible in <a href="https://github.com/CenturionB6/rust4sap-samples" style="color:inherit;text-decoration:underline">rust4sap-samples</a></td></tr>
           <tr><td>&nbsp;&nbsp;identity, delegation, per-request isolation</td><td><code>tests/identity</code>, <code>request_identity</code></td><td class="pass">23</td></tr>
           <tr><td>&nbsp;&nbsp;ABAC rules, clearance, scope monotonicity</td><td><code>tests/abac</code>, <code>classification</code></td><td class="pass">19</td></tr>
           <tr><td>&nbsp;&nbsp;JWKS rotation and refresh concurrency</td><td><code>tests/jwks_*</code></td><td class="pass">13</td></tr>
@@ -463,7 +464,7 @@
           <tr><td>&nbsp;&nbsp;public export leakage, pseudonyms</td><td><code>tests/public_*</code></td><td class="pass">15</td></tr>
           <tr><td>Lints</td><td><code>cargo clippy</code></td><td class="pass">0 findings</td></tr>
           <tr><td>Release build</td><td><code>cargo build --release</code></td><td class="pass">1m 15s · 5.06 MB</td></tr>
-          <tr><td>Clean clone</td><td><code>git clone &amp;&amp; cargo test</code></td><td class="pass">134 passed</td></tr>
+          <tr><td>Clean clone</td><td><code>git clone &amp;&amp; cargo test</code></td><td class="pass">134 passed (private) · 37 (samples)</td></tr>
           <tr><td>Live SAP system</td><td>—</td><td style="color:var(--warn)">not yet</td></tr>
         </tbody>
       </table>
