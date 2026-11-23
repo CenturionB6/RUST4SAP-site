@@ -263,7 +263,9 @@
   </section>
 </div>
 
-<script>
+<script type="module">
+  import { classify } from './classify.mjs';
+
   const toggle = document.getElementById('toggle');
   const body = document.body;
   const results = [...document.querySelectorAll('.result')];
@@ -306,30 +308,20 @@
     })
     .catch(() => { warn.hidden = false; askBtn.disabled = true; });
 
-  const UNKNOWN = {
-    outcome: 'unknown',
-    reason: 'decision metadata is missing or from an unsupported schema — republish decisions.json',
-    permitted_fields: [], rows_returned: 0, rows_dropped: 0, evidence: [], records: [],
-    allowed: false, row_filtered: false,
-  };
-
-  function supported(sc) {
-    return sc && sc.schema_version === 2 && ['allow', 'conditional', 'deny'].includes(sc.outcome);
-  }
-
   askBtn.addEventListener('click', () => {
     if (!data) return;
     const raw = data.scenarios[Number(who.value)];
-    const stale = !supported(raw);
-    const sc = stale ? UNKNOWN : raw;
+    const gate = classify(raw);            // tested in classify.test.mjs
+    const stale = gate.stale;
+    const sc = stale ? { outcome: gate.outcome, reason: gate.reason } : raw;
     result.hidden = false;
     const badgeEl = document.getElementById('badge');
-    badgeEl.textContent = sc.outcome.toUpperCase();
-    badgeEl.className = 'badge ' + sc.outcome;
+    badgeEl.textContent = gate.outcome.toUpperCase();
+    badgeEl.className = 'badge ' + gate.outcome;
     if (stale) {
       results.forEach(el => el.classList.remove('lit'));
       pinned = true;
-      document.getElementById('reason').textContent = UNKNOWN.reason;
+      document.getElementById('reason').textContent = gate.reason;
       ['fields', 'rows', 'dropped', 'scope', 'policy', 'records', 'evidence'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.textContent = '—';
@@ -357,7 +349,7 @@
 
     pinned = true;
     results.forEach(el => el.classList.remove('lit'));
-    const node = results.find(el => el.classList.contains(outcome));
+    const node = results.find(el => el.classList.contains(gate.outcome));
     if (node) node.classList.add('lit');
   });
 
