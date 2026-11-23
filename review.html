@@ -126,7 +126,7 @@
 
   /* evidence table */
   table.ev { width: 100%; border-collapse: collapse; font-size: 14px; }
-  @media (max-width: 640px) {
+  @media (max-width: 900px) {
     table.ev { display: block; overflow-x: auto; white-space: nowrap; }
     table.ev > thead, table.ev > tbody { display: table; width: 100%; min-width: max-content; }
   }
@@ -143,6 +143,10 @@
   .use > * { min-width: 0; }
   .use .term { min-width: 0; }
   @media (max-width: 860px) { .use { grid-template-columns: 1fr; } }
+  @media (max-width: 520px) {
+    .term pre { font-size: 12px; }
+    table.ev th, table.ev td { padding: 9px 10px; }
+  }
   .steps { margin: 0; padding: 0; list-style: none; counter-reset: s; }
   .steps li { counter-increment: s; display: grid; grid-template-columns: 26px 1fr; gap: 10px; padding: 10px 0; color: var(--muted); }
   .steps li > span { display: block; }   /* keep inline <code> inside the text cell */
@@ -393,7 +397,12 @@
           <tr><td>Live SAP connection</td><td style="color:var(--warn)">not yet</td><td>connector is a mock; no SAP system has been contacted</td></tr>
         </tbody>
       </table>
-
+      <p class="sub" style="margin-top:18px;font-size:13px">
+        Of these 134, <b>37 are public</b> in <code>rust4sap-samples</code>: 23 of the 26
+        ABAC/classification tests (<code>export_shape</code> is not) and 14 of the 22 audit tests
+        (<code>audit_attribution</code> is not). The 10 server-contract tests, plus identity, JWKS,
+        edge and public-export tests, remain private.
+      </p>
     </div>
   </section>
 
